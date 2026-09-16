@@ -28,11 +28,7 @@ const appOnlyPlugins = process.env.VITEST
   ? []
   : [
       devtools(),
-      tanstackStart({
-        prerender: {
-          enabled: process.env.PRERENDER === 'true' || isGhPages,
-        },
-      }),
+      tanstackStart({ prerender: { enabled: false } }),
       nitro(
         process.env.VERCEL
           ? { output: { dir: path.resolve(__dirname, '../../.vercel/output') } }
