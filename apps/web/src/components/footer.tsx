@@ -1,8 +1,7 @@
-import { CircleDotIcon, StarIcon, SwordIcon } from 'lucide-react';
+import { SwordIcon } from 'lucide-react';
 import { Link } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
-import { REPO_URL } from '@/components/shell/nav';
 import { equipmentDbView } from '@/lib/vm/equipement';
 import { eventsDbView } from '@/lib/vm/events';
 import { inventoryDbView } from '@/lib/vm/inventory';
@@ -14,67 +13,25 @@ import { Button } from './ui/button';
 import { Spinner } from './ui/spinner';
 
 export function Footer() {
-  const stars = useGithubStars();
   return (
     <footer className='flex flex-col gap-4 border-t border-border px-4 pt-6 pb-7 md:px-7'>
       <div className='flex flex-wrap items-start justify-between gap-4'>
         <div className='flex max-w-lg flex-col gap-1.5'>
           <div className='flex items-center gap-2 text-[15px] font-bold'>
             <SwordIcon className='size-4' />
-            Elden Ring Compass
+            Elden Ring Compass+
           </div>
           <p className='text-[12.5px] leading-relaxed text-muted-foreground'>
-            A free, open-source, read-only save analyzer for Elden Ring — it runs entirely in your
-            browser and your save never leaves your device.
+            A free, open-source save analyzer for Elden Ring — it runs entirely in your browser.
           </p>
         </div>
 
         <div className='flex flex-wrap gap-2'>
-          <Button
-            variant='outline'
-            size='sm'
-            nativeButton={false}
-            render={
-              <a
-                href={`${REPO_URL}/stargazers`}
-                target='_blank'
-                rel='noreferrer'
-                aria-label='Star on GitHub'
-              />
-            }
-          >
-            <StarIcon />
-            Star
-            {stars !== null && (
-              <span className='font-mono tabular-nums text-muted-foreground'>
-                {stars.toLocaleString()}
-              </span>
-            )}
-          </Button>
-          <Button
-            variant='outline'
-            size='sm'
-            nativeButton={false}
-            render={
-              <a
-                href={`${REPO_URL}/issues/new`}
-                target='_blank'
-                rel='noreferrer'
-                aria-label='Open an issue'
-              />
-            }
-          >
-            <CircleDotIcon />
-            Open an issue
-          </Button>
           <CopySaveAsJsonButton />
         </div>
       </div>
 
       <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px] text-muted-foreground'>
-        <span className='flex items-center gap-1.5 rounded-full border border-border px-2.5 py-1'>
-          Read-only · your save never leaves your device
-        </span>
         <Link
           to='/credits'
           className='font-medium text-foreground underline underline-offset-2 hover:decoration-2'
@@ -86,30 +43,6 @@ export function Footer() {
       </div>
     </footer>
   );
-}
-
-/**
- * Live GitHub star count for the repo, fetched client-side (unauthenticated, so
- * subject to GitHub's 60 req/hr/IP limit — fine for a footer). Returns null until
- * loaded or on any failure, so the Star button just omits the number.
- */
-function useGithubStars(): number | null {
-  const [stars, setStars] = useState<number | null>(null);
-  useEffect(() => {
-    // REPO_URL = https://github.com/<owner>/<repo>
-    const slug = REPO_URL.replace(/^https?:\/\/github\.com\//, '');
-    const controller = new AbortController();
-    fetch(`https://api.github.com/repos/${slug}`, { signal: controller.signal })
-      .then((r) => (r.ok ? (r.json() as Promise<{ stargazers_count?: number }>) : null))
-      .then((data) => {
-        if (typeof data?.stargazers_count === 'number') setStars(data.stargazers_count);
-      })
-      .catch(() => {});
-    return () => {
-      controller.abort();
-    };
-  }, []);
-  return stars;
 }
 
 function CopySaveAsJsonButton() {

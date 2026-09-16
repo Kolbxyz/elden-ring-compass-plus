@@ -521,7 +521,7 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
   useEffect(() => {
     if (!mounted) return;
     let cancelled = false;
-    fetch('/map-tiles/manifest.json')
+    fetch(`${import.meta.env.BASE_URL}map-tiles/manifest.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`manifest ${r.status}`);
         return r.json() as Promise<MapManifest>;
@@ -534,7 +534,7 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
       });
     // Existence index — best-effort: if it fails the map still works (it just
     // falls back to requesting every tile, blank ones included).
-    fetch('/map-tiles/tile-index.json')
+    fetch(`${import.meta.env.BASE_URL}map-tiles/tile-index.json`)
       .then((r) => (r.ok ? (r.json() as Promise<TileIndex>) : null))
       .then((idx) => {
         if (!cancelled && idx) setTileIndex(idx);

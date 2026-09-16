@@ -193,7 +193,7 @@ export function CreditsSection() {
           .
         </p>
         <p className='max-w-[70ch] text-[11px] text-muted-foreground'>
-          Elden Ring Compass is a fan project and is not affiliated with, endorsed by, or sponsored
+          Elden Ring Compass+ is a fan project and is not affiliated with, endorsed by, or sponsored
           by FromSoftware or Bandai Namco Entertainment.
         </p>
       </div>

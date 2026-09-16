@@ -24,7 +24,7 @@ if (import.meta.env.DEV && typeof window !== 'undefined') {
   });
 }
 
-const SITE_TITLE = 'Elden Ring Compass';
+const SITE_TITLE = 'Elden Ring Compass+';
 const SITE_DESCRIPTION =
   'A free, open-source, read-only Elden Ring save analyzer — explore the world map, bosses, ' +
   'inventory and weapon AR right in your browser. Your save never leaves your device.';

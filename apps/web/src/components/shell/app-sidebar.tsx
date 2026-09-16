@@ -120,7 +120,7 @@ export function AppSidebar() {
             <SwordIcon className='size-5' />
           </span>
           <div className='min-w-0 leading-tight group-data-[collapsible=icon]:hidden'>
-            <h1 className='truncate text-sm font-bold tracking-tight'>Elden Ring Compass</h1>
+            <h1 className='truncate text-sm font-bold tracking-tight'>Elden Ring Compass+</h1>
             <p className='text-[11px] text-muted-foreground'>Save Parser</p>
           </div>
           <DarkModeToggle size='icon-sm' className='ml-auto group-data-[collapsible=icon]:hidden' />

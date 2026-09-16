@@ -494,7 +494,7 @@ function MapBody({
     <>
       <ExistenceTileLayer
         key={activeMapId}
-        url={`/map-tiles/${activeMapId}/${BASE_LAYER}/{z}/{y}/{x}.webp`}
+        url={`${import.meta.env.BASE_URL}map-tiles/${activeMapId}/${BASE_LAYER}/{z}/{y}/{x}.webp`}
         tileSize={manifest.tileSize}
         maxNativeZoom={z}
         bounds={bounds}
