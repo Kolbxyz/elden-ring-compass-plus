@@ -5,8 +5,8 @@ import {
   ChevronDownIcon,
   ChevronUpIcon,
   CompassIcon,
-  ListChecksIcon,
   MapPinIcon,
+  RotateCcwIcon,
   SparklesIcon,
   TrophyIcon,
 } from 'lucide-react';
@@ -17,8 +17,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { QUESTLINES, type Questline, type QuestStep } from '@/lib/quests-data';
+import { QUESTLINES, type QuestStep } from '@/lib/quests-data';
 import { cn } from '@/lib/utils';
+import { inventoryDbView } from '@/lib/vm/inventory';
 import { useSelectedSlot } from '@/stores/slot-selection-store';
 
 export function QuestsView() {
@@ -30,18 +31,113 @@ export function QuestsView() {
   const [expandedQuests, setExpandedQuests] = useState<Record<string, boolean>>({
     ranni: true,
   });
+  const [manualOverrides, setManualOverrides] = useState<Record<string, boolean>>({});
+
+  // Resolve inventory items from active save slot
+  const invItems = useMemo(() => {
+    if (!slot) return [];
+    try {
+      return inventoryDbView(slot).items;
+    } catch {
+      return [];
+    }
+  }, [slot]);
+
+  const itemNamesSet = useMemo(() => {
+    return new Set(invItems.map((i) => i.item_name.toLowerCase()));
+  }, [invItems]);
+
+  const hasItem = (target: string): boolean => {
+    const t = target.toLowerCase();
+    if (itemNamesSet.has(t)) return true;
+    for (const it of invItems) {
+      if (it.item_name.toLowerCase().includes(t)) return true;
+    }
+    return false;
+  };
 
   // Evaluate if an event flag is set in the active character save
-  const isFlagSet = (flagId: number): boolean => {
-    if (!slot) return false;
+  const isFlagSet = (flagId?: number): boolean => {
+    if (!slot || !flagId) return false;
     const offset = eventFlagOffset(flagId);
     if (!offset) return false;
     return ((slot.event_flags.flags[offset[0]] ?? 0) & (1 << offset[1])) !== 0;
   };
 
+  // Check if a step is directly verified by save signals
+  const isStepDirectlyDone = (step: QuestStep): boolean => {
+    if (!slot) return false;
+    if (isFlagSet(step.flagId)) return true;
+    if (step.altFlagIds?.some((id) => isFlagSet(id))) return true;
+    if (step.bossFlagIds?.some((id) => isFlagSet(id))) return true;
+    if (step.graceFlagIds?.some((id) => isFlagSet(id))) return true;
+    if (step.itemNames?.some((name) => hasItem(name))) return true;
+    return false;
+  };
+
+  // Compute status map for each questline: direct match, sequential propagation, manual override
+  const questStatusMap = useMemo(() => {
+    const res: Record<
+      string,
+      {
+        isDone: boolean;
+        isDirect: boolean;
+        isInferred: boolean;
+        isManual: boolean;
+      }
+    > = {};
+
+    for (const quest of QUESTLINES) {
+      const directFlags = quest.steps.map((s) => isStepDirectlyDone(s));
+
+      // In FromSoft questlines, reaching/completing step K implies all preceding prerequisite steps 1..(K-1) are satisfied.
+      let highestDirectIdx = -1;
+      for (let i = quest.steps.length - 1; i >= 0; i--) {
+        if (directFlags[i]) {
+          highestDirectIdx = i;
+          break;
+        }
+      }
+
+      for (let i = 0; i < quest.steps.length; i++) {
+        const step = quest.steps[i];
+        const direct = directFlags[i];
+        const inferred = !direct && highestDirectIdx >= 0 && i < highestDirectIdx;
+        const autoDone = direct || inferred;
+
+        const manual = manualOverrides[step.id];
+        const finalDone = manual !== undefined ? manual : autoDone;
+
+        res[step.id] = {
+          isDone: finalDone,
+          isDirect: direct,
+          isInferred: inferred,
+          isManual: manual !== undefined,
+        };
+      }
+    }
+
+    return res;
+  }, [slot, invItems, manualOverrides]);
+
   const toggleExpand = (questId: string) => {
     setExpandedQuests((prev) => ({ ...prev, [questId]: !prev[questId] }));
   };
+
+  const handleStepToggle = (stepId: string, currentDone: boolean, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setManualOverrides((prev) => {
+      const next = { ...prev };
+      next[stepId] = !currentDone;
+      return next;
+    });
+  };
+
+  const resetOverrides = () => {
+    setManualOverrides({});
+  };
+
+  const hasManualOverrides = Object.keys(manualOverrides).length > 0;
 
   // Filter questlines
   const filteredQuests = useMemo(() => {
@@ -73,7 +169,7 @@ export function QuestsView() {
 
     for (const q of QUESTLINES) {
       totalSteps += q.steps.length;
-      const doneCount = q.steps.filter((s) => isFlagSet(s.flagId)).length;
+      const doneCount = q.steps.filter((s) => questStatusMap[s.id]?.isDone).length;
       completedSteps += doneCount;
       if (doneCount === q.steps.length && q.steps.length > 0) {
         completedQuests++;
@@ -82,7 +178,7 @@ export function QuestsView() {
 
     const pct = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
     return { totalSteps, completedSteps, completedQuests, pct };
-  }, [slot]);
+  }, [questStatusMap]);
 
   return (
     <div className='flex flex-1 flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full'>
@@ -96,12 +192,24 @@ export function QuestsView() {
             </Badge>
           </div>
           <p className='text-sm text-muted-foreground max-w-2xl'>
-            Interactive quest tracker evaluating real-time event flags from your Elden Ring save file.
-            Discover your next objective and avoid locking yourself out of vital storylines.
+            Interactive quest tracker evaluating real-time event flags, inventory items, and grace
+            checkpoints from your Elden Ring save file. Discover your next objective and avoid locking
+            yourself out of vital storylines.
           </p>
         </div>
 
         <div className='flex items-center gap-3'>
+          {hasManualOverrides && (
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={resetOverrides}
+              className='text-xs flex items-center gap-1.5'
+            >
+              <RotateCcwIcon className='size-3.5' />
+              Reset Checks
+            </Button>
+          )}
           <ConnectSaveButton />
         </div>
       </div>
@@ -117,7 +225,8 @@ export function QuestsView() {
         <Card className='p-4 bg-card/60 backdrop-blur-sm'>
           <div className='text-xs text-muted-foreground uppercase font-medium'>Steps Completed</div>
           <div className='text-2xl font-bold mt-1 text-emerald-500'>
-            {stats.completedSteps} <span className='text-sm font-normal text-muted-foreground'>/ {stats.totalSteps}</span>
+            {stats.completedSteps}{' '}
+            <span className='text-sm font-normal text-muted-foreground'>/ {stats.totalSteps}</span>
           </div>
           <div className='text-xs text-muted-foreground mt-0.5'>{stats.pct}% total progression</div>
         </Card>
@@ -125,7 +234,8 @@ export function QuestsView() {
         <Card className='p-4 bg-card/60 backdrop-blur-sm'>
           <div className='text-xs text-muted-foreground uppercase font-medium'>Quests Finished</div>
           <div className='text-2xl font-bold mt-1 text-amber-500'>
-            {stats.completedQuests} <span className='text-sm font-normal text-muted-foreground'>/ {QUESTLINES.length}</span>
+            {stats.completedQuests}{' '}
+            <span className='text-sm font-normal text-muted-foreground'>/ {QUESTLINES.length}</span>
           </div>
           <div className='text-xs text-muted-foreground mt-0.5'>Terminal states reached</div>
         </Card>
@@ -178,9 +288,9 @@ export function QuestsView() {
       <div className='flex flex-col gap-4'>
         {filteredQuests.map((quest) => {
           const isExpanded = !!expandedQuests[quest.id];
-          const completedCount = quest.steps.filter((s) => isFlagSet(s.flagId)).length;
+          const completedCount = quest.steps.filter((s) => questStatusMap[s.id]?.isDone).length;
           const isFullyDone = completedCount === quest.steps.length && quest.steps.length > 0;
-          const currentStepIndex = quest.steps.findIndex((s) => !isFlagSet(s.flagId));
+          const currentStepIndex = quest.steps.findIndex((s) => !questStatusMap[s.id]?.isDone);
           const nextStep = currentStepIndex !== -1 ? quest.steps[currentStepIndex] : null;
           const progressPercent = Math.round((completedCount / quest.steps.length) * 100);
 
@@ -193,7 +303,10 @@ export function QuestsView() {
               )}
             >
               {/* Card Header & Summary Bar */}
-              <CardHeader className='p-4 sm:p-6 cursor-pointer' onClick={() => toggleExpand(quest.id)}>
+              <CardHeader
+                className='p-4 sm:p-6 cursor-pointer'
+                onClick={() => toggleExpand(quest.id)}
+              >
                 <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
                   <div className='space-y-1.5'>
                     <div className='flex flex-wrap items-center gap-2'>
@@ -263,7 +376,10 @@ export function QuestsView() {
                       </div>
                     </div>
                     {nextStep.requiresBefore && (
-                      <Badge variant='outline' className='border-rose-500/40 text-rose-400 bg-rose-500/10 text-[10px]'>
+                      <Badge
+                        variant='outline'
+                        className='border-rose-500/40 text-rose-400 bg-rose-500/10 text-[10px]'
+                      >
                         ⚠️ {nextStep.requiresBefore}
                       </Badge>
                     )}
@@ -283,22 +399,31 @@ export function QuestsView() {
                 <CardContent className='pt-0 pb-6 px-4 sm:px-6 border-t border-border/20 mt-2'>
                   <div className='relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-2 sm:before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60 mt-4'>
                     {quest.steps.map((step, idx) => {
-                      const isDone = isFlagSet(step.flagId);
+                      const status = questStatusMap[step.id] ?? {
+                        isDone: false,
+                        isDirect: false,
+                        isInferred: false,
+                        isManual: false,
+                      };
+                      const isDone = status.isDone;
                       const isCurrent = idx === currentStepIndex;
 
                       return (
                         <div key={step.id} className='relative flex flex-col gap-1.5'>
-                          {/* Dot / Indicator */}
-                          <div
+                          {/* Dot / Indicator — Clickable to toggle manual check */}
+                          <button
+                            type='button'
+                            title={isDone ? 'Click to mark uncompleted' : 'Click to mark completed'}
+                            onClick={(e) => handleStepToggle(step.id, isDone, e)}
                             className={cn(
-                              'absolute -left-6 sm:-left-8 top-0.5 size-4 rounded-full border-2 bg-background flex items-center justify-center transition-all',
+                              'absolute -left-6 sm:-left-8 top-0.5 size-4 rounded-full border-2 bg-background flex items-center justify-center transition-all cursor-pointer hover:scale-125 focus:outline-none',
                               isDone && 'border-emerald-500 bg-emerald-500 text-white',
                               isCurrent && 'border-amber-500 bg-amber-500/20 ring-4 ring-amber-500/20',
-                              !isDone && !isCurrent && 'border-muted-foreground/30 bg-muted/40',
+                              !isDone && !isCurrent && 'border-muted-foreground/30 bg-muted/40 hover:border-amber-400',
                             )}
                           >
                             {isDone && <CheckCircle2Icon className='size-3' />}
-                          </div>
+                          </button>
 
                           {/* Step Header */}
                           <div className='flex flex-wrap items-center gap-2'>
@@ -327,8 +452,18 @@ export function QuestsView() {
                             )}
 
                             {isDone && (
-                              <Badge variant='outline' className='text-[10px] text-emerald-400 border-emerald-500/30 bg-emerald-500/10'>
-                                Done
+                              <Badge
+                                variant='outline'
+                                className={cn(
+                                  'text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+                                  status.isManual && 'border-sky-500/30 bg-sky-500/10 text-sky-400',
+                                )}
+                              >
+                                {status.isManual
+                                  ? 'Manual check'
+                                  : status.isDirect
+                                    ? 'Save verified'
+                                    : 'Completed'}
                               </Badge>
                             )}
                           </div>
