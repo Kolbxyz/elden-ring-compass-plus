@@ -20,13 +20,13 @@ export function DataTableToolbar<TData extends RowData>({ table }: DataTableTool
   const isFiltered = table.state.columnFilters.length > 0;
 
   return (
-    <div className='flex items-center justify-between'>
-      <div className='mr-10 flex flex-1 flex-wrap items-center gap-2'>
+    <div className='flex flex-wrap items-center justify-between gap-2'>
+      <div className='flex flex-1 flex-wrap items-center gap-2 sm:mr-6'>
         <Input
           placeholder={'Search'}
           value={(table.getColumn('Name')?.getFilterValue() as string | undefined) ?? ''}
           onChange={(event) => table.getColumn('Name')?.setFilterValue(event.target.value)}
-          className='h-8 w-[150px] lg:w-[250px]'
+          className='h-8 w-full sm:w-[150px] lg:w-[250px]'
         />
         {table
           .getAllLeafColumns()

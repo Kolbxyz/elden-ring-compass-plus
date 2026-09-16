@@ -172,7 +172,7 @@ export function NearbyItemsPanel({
     <div
       className={cn(
         OVERLAY_PANEL,
-        'pointer-events-auto flex min-h-0 w-72 flex-col gap-2.5 overflow-y-auto p-3',
+        'pointer-events-auto flex min-h-0 w-72 max-w-[calc(100vw-2rem)] flex-col gap-2.5 overflow-y-auto p-3',
       )}
     >
       <div>

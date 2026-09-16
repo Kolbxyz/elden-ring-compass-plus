@@ -153,7 +153,7 @@ function MapRightRail({
         <div
           className={cn(
             OVERLAY_PANEL,
-            'pointer-events-auto flex min-h-0 w-60 flex-col gap-3 overflow-y-auto p-3',
+            'pointer-events-auto flex min-h-0 w-60 max-w-[calc(100vw-2rem)] flex-col gap-3 overflow-y-auto p-3',
           )}
         >
           <div>

@@ -98,7 +98,8 @@ export function QuestsView() {
 
       for (let i = 0; i < quest.steps.length; i++) {
         const step = quest.steps[i];
-        const direct = directFlags[i];
+        if (!step) continue;
+        const direct = Boolean(directFlags[i]);
         const inferred = !direct && highestDirectIdx >= 0 && i < highestDirectIdx;
         const autoDone = direct || inferred;
 
