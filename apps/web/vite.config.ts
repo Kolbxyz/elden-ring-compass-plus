@@ -40,9 +40,14 @@ const appOnlyPlugins = process.env.VITEST
 // @rolldown/plugin-babel). MUST come after viteReact() — the preset's rolldown filter only
 // applies it to the client environment and to files that look like components/hooks. Gated out of
 // VITEST for the same reason as appOnlyPlugins: tests run on the un-compiled source.
-const reactCompilerPlugins = process.env.VITEST
-  ? []
-  : [babel({ presets: [reactCompilerPreset()] })];
+const reactCompilerPlugins =
+  process.env.NODE_ENV === 'production' && !process.env.VITEST
+    ? [
+        babel({
+          presets: [reactCompilerPreset()],
+        }),
+      ]
+    : [];
 
 export default defineConfig({
   base: basePath,
@@ -68,11 +73,5 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
-  },
-  ssr: {
-    external: ['lucide-react'],
-  },
-  optimizeDeps: {
-    include: ['lucide-react'],
   },
 });
