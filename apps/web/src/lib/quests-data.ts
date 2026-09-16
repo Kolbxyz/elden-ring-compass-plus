@@ -30,10 +30,51 @@ export const WORLD_FLAGS = {
   GODRICK_DEFEATED: 10000800,
   RADAHN_DEFEATED: 310,
   MORGOTT_DEFEATED: 11000800,
-  FIRE_GIANT_DEFEATED: 11000800,
+  RYKARD_DEFEATED: 16000800,
+  FIRE_GIANT_DEFEATED: 1052520800,
   MALIKETH_DEFEATED: 13000800,
   ERDTREE_BURNING: 1039500900,
+  FRENZIED_FLAME_INHERITED: 1044450000,
 } as const;
+
+export interface WorldCutoff {
+  readonly id: string;
+  readonly name: string;
+  readonly flagId: number;
+  readonly bossOrEvent: string;
+  readonly impact: string;
+}
+
+export const WORLD_CUTOFFS: readonly WorldCutoff[] = [
+  {
+    id: 'rykard',
+    name: 'Rykard Defeated',
+    flagId: WORLD_FLAGS.RYKARD_DEFEATED,
+    bossOrEvent: 'Defeating Rykard, Lord of Blasphemy',
+    impact: 'Disbands Volcano Manor and halts assassination contracts',
+  },
+  {
+    id: 'forge',
+    name: 'Erdtree Ignited',
+    flagId: WORLD_FLAGS.ERDTREE_BURNING,
+    bossOrEvent: 'Committing cardinal sin at Forge of the Giants',
+    impact: 'Burns the Erdtree and permanently alters the Lands Between',
+  },
+  {
+    id: 'maliketh',
+    name: 'Capital of Ash',
+    flagId: WORLD_FLAGS.MALIKETH_DEFEATED,
+    bossOrEvent: 'Defeating Maliketh the Black Blade in Farum Azula',
+    impact: 'Buries Leyndell in ash, locking out Leyndell & Golden Order questlines',
+  },
+  {
+    id: 'frenzy',
+    name: 'Three Fingers Embrace',
+    flagId: WORLD_FLAGS.FRENZIED_FLAME_INHERITED,
+    bossOrEvent: 'Inheriting Frenzied Flame below the Subterranean Shunning-Grounds',
+    impact: 'Locks character into Lord of Frenzied Flame ending unless cleansed with Miquella’s Needle',
+  },
+] as const;
 
 export const QUESTLINES: readonly Questline[] = [
   {
@@ -282,6 +323,7 @@ export const QUESTLINES: readonly Questline[] = [
         altFlagIds: [1038547700],
         itemNames: ["Radagon's Rings of Light"],
         requiresBefore: 'Must solve BEFORE defeating Maliketh in Farum Azula',
+        lockoutFlagId: WORLD_FLAGS.MALIKETH_DEFEATED,
         missable: true,
       },
       {
@@ -515,9 +557,9 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Use an Imbued Sword Key at the Four Belfries to reach the Chapel of Anticipation. Loot The Stormhawk King spirit ashes and deliver them to Nepheli. (WARNING: Do NOT give her Seluvis’s Potion!).',
         flagId: 1035500140,
-        altFlagIds: [1035500570, 1035500571],
         missable: true,
         requiresBefore: 'Do NOT give Seluvis potion to Nepheli!',
+        lockoutFlagId: WORLD_FLAGS.MALIKETH_DEFEATED,
       },
       {
         id: 'nepheli-5',
@@ -527,7 +569,8 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'After slaying Morgott in Leyndell and satisfying Kenneth/Nepheli steps, rest at Godrick’s grace. Nepheli ascends the throne as Lord of Limgrave, with Kenneth and Gostoc present.',
         flagId: 1035500160,
-        altFlagIds: [1035500900, 1035500920],
+        altFlagIds: [1035500200],
+        lockoutFlagId: WORLD_FLAGS.MALIKETH_DEFEATED,
         rewards: ['Ancient Dragon Smithing Stone x2'],
       },
     ],

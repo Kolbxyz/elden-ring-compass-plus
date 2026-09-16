@@ -4,6 +4,7 @@ import { DarkModeToggle } from '@/components/misc/dark-mode-toggle';
 import { ConnectSaveButton } from '@/components/misc/save-file-source-selector';
 import { Separator } from '@/components/ui/separator';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { statsDbView } from '@/lib/vm/stats';
 import { useSelectedSlot } from '@/stores/slot-selection-store';
 
 import { SECTION_META } from './nav';
@@ -23,7 +24,9 @@ function resolveSectionMeta(pathname: string): { title: string; sub: string } {
 export function AppTopBar() {
   const pathname = useLocation({ select: (l) => l.pathname });
   const meta = resolveSectionMeta(pathname);
-  const connected = !!useSelectedSlot();
+  const slot = useSelectedSlot();
+  const connected = !!slot;
+  const stats = slot ? statsDbView(slot) : null;
 
   return (
     <div className='sticky top-0 z-20 flex items-center gap-3 border-b border-border bg-background/85 px-4 py-3 backdrop-blur md:px-7 md:py-4'>
@@ -42,7 +45,18 @@ export function AppTopBar() {
       {/* Quick mobile actions. Full controls live in the sidebar Sheet (open via
           the trigger); these stay surfaced for one-tap access on small screens. */}
       <div className='flex shrink-0 items-center gap-2 md:hidden'>
-        {!connected && <ConnectSaveButton variant='outline' size='sm' />}
+        {connected && stats ? (
+          <div
+            className='flex items-center gap-1.5 rounded-full border border-border/60 bg-muted/40 px-2.5 py-1 text-[11px] font-medium tabular-nums'
+            title={`${slot?.player_game_data.character_name ?? 'Tarnished'} · Level ${stats.stats.level} · ${stats.stats.souls.toLocaleString()} runes`}
+          >
+            <span className='font-semibold'>Lv.{stats.stats.level}</span>
+            <span className='text-muted-foreground'>·</span>
+            <span className='text-amber-500 font-semibold'>{stats.stats.souls.toLocaleString()}</span>
+          </div>
+        ) : (
+          <ConnectSaveButton variant='outline' size='sm' />
+        )}
         <DarkModeToggle />
       </div>
     </div>

@@ -7,6 +7,7 @@ import {
   type Milestone,
 } from '@/lib/completion';
 import { statsDbView } from '@/lib/vm/stats';
+import { cn } from '@/lib/utils';
 import { useSelectedSlot, useSlotNameSelection } from '@/stores/slot-selection-store';
 import { CompletionRing } from './completion-ring';
 import { Badge } from '../ui/badge';
@@ -138,14 +139,23 @@ function MilestoneChips({ milestones }: { milestones: Milestone[] }) {
   return (
     <div className='flex flex-col gap-2 border-t border-border pt-4'>
       <span className='text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'>
-        Milestones
+        Key Milestones &amp; Collectibles
       </span>
       <div className='flex flex-wrap gap-2'>
         {milestones.map((m) => {
           const done = m.total > 0 && m.owned >= m.total;
           return (
-            <Badge key={m.key} variant={done ? 'default' : 'secondary'} className='text-xs'>
-              {m.label} {m.owned}/{m.total}
+            <Badge
+              key={m.key}
+              variant={done ? 'default' : 'outline'}
+              className={cn(
+                'text-xs py-1 px-2.5 transition-colors',
+                done
+                  ? 'bg-amber-500/15 text-amber-500 border-amber-500/30 font-medium'
+                  : 'text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {m.label} <span className='ml-1.5 font-semibold tabular-nums'>{m.owned}/{m.total}</span>
             </Badge>
           );
         })}

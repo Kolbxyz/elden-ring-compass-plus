@@ -12,6 +12,7 @@ import {
 
 import { goodsByName } from '@/lib/game-data';
 import { assertDefined, cn } from '@/lib/utils';
+import { WHETBLADES } from '@/lib/completion';
 import { eventsDbView } from '@/lib/vm/events';
 import { inventoryDbView } from '@/lib/vm/inventory';
 import { useSelectedSlot } from '@/stores/slot-selection-store';
@@ -266,28 +267,31 @@ export function OverviewSection() {
         <ActiveEffectsCard />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Flasks</CardTitle>
-          <CardDescription>
-            Flask charges, seeds, sacred tears &amp; physick crystal tears
-          </CardDescription>
-        </CardHeader>
-        <CardContent className='flex flex-col gap-1'>
-          <FlaskItem item={crimsonFlask} valueText={`Potency +${crimsonPotency} / +12`} />
-          <Separator />
-          <FlaskItem item={usersCeruleanFlask} valueText={`Potency +${ceruleanPotency} / +12`} />
-          <Separator />
-          <FlaskItem item={goldenSeedGood} valueText={`${unusedSeeds} in bag`} />
-          <Separator />
-          <FlaskItem
-            item={sacredTearGood}
-            valueText={`${sacredTearsFound} / 12 found (${crimsonPotency} used)`}
-          />
-          <Separator />
-          <WondrousPhysick />
-        </CardContent>
-      </Card>
+      <div className='grid gap-5 lg:grid-cols-2'>
+        <Card>
+          <CardHeader>
+            <CardTitle>Flasks</CardTitle>
+            <CardDescription>
+              Flask charges, seeds, sacred tears &amp; physick crystal tears
+            </CardDescription>
+          </CardHeader>
+          <CardContent className='flex flex-col gap-1'>
+            <FlaskItem item={crimsonFlask} valueText={`Potency +${crimsonPotency} / +12`} />
+            <Separator />
+            <FlaskItem item={usersCeruleanFlask} valueText={`Potency +${ceruleanPotency} / +12`} />
+            <Separator />
+            <FlaskItem item={goldenSeedGood} valueText={`${unusedSeeds} in bag`} />
+            <Separator />
+            <FlaskItem
+              item={sacredTearGood}
+              valueText={`${sacredTearsFound} / 12 found (${crimsonPotency} used)`}
+            />
+            <Separator />
+            <WondrousPhysick />
+          </CardContent>
+        </Card>
+        <WhetbladesAndRebirthCard />
+      </div>
 
       <Card className='overflow-hidden'>
         <CardHeader>
@@ -509,5 +513,105 @@ function FlaskItem({
         </p>
       </div>
     </div>
+  );
+}
+
+function WhetbladesAndRebirthCard() {
+  const slot = useSelectedSlot();
+  const inventoryQuantityById = new Map(
+    slot ? inventoryDbView(slot).items.map((item) => [item.item_id, item.quantity]) : [],
+  );
+  const larvalTears =
+    (inventoryQuantityById.get(8185) ?? 0) + (inventoryQuantityById.get(2008033) ?? 0);
+  const larvalItem = goodsByName.get('Larval Tear');
+  const scaduGood = goodsByName.get('Scadutree Fragment');
+  const reveredGood = goodsByName.get('Revered Spirit Ash');
+  const scaduCount = scaduGood ? (inventoryQuantityById.get(scaduGood.id) ?? 0) : 0;
+  const reveredCount = reveredGood ? (inventoryQuantityById.get(reveredGood.id) ?? 0) : 0;
+
+  const ownedWhetbladeCount = WHETBLADES.filter(
+    (wb) => (inventoryQuantityById.get(wb.id) ?? 0) > 0,
+  ).length;
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Catalysts &amp; Rebirth</CardTitle>
+        <CardDescription>
+          {ownedWhetbladeCount} / {WHETBLADES.length} Whetblades · {larvalTears} Larval Tears held
+        </CardDescription>
+      </CardHeader>
+      <CardContent className='flex flex-col gap-3'>
+        <FlaskItem
+          item={larvalItem}
+          valueText={`${larvalTears} in bag (18 per base NG cycle)`}
+        />
+        <Separator />
+        <div className='flex flex-col gap-2'>
+          <span className='text-xs font-semibold text-muted-foreground uppercase tracking-wider'>
+            Whetblades &amp; Affinities
+          </span>
+          <div className='grid grid-cols-1 sm:grid-cols-2 gap-2'>
+            {WHETBLADES.map((wb) => {
+              const owned = (inventoryQuantityById.get(wb.id) ?? 0) > 0;
+              const good = goodsByName.get(wb.name);
+              const iconUrl = good ? itemIconUrl(good.icon) : null;
+              return (
+                <div
+                  key={wb.id}
+                  className={cn(
+                    'flex items-center gap-2.5 p-2 rounded-lg border transition-all text-xs',
+                    owned
+                      ? 'border-emerald-500/30 bg-emerald-950/10'
+                      : 'border-border/40 bg-muted/20 opacity-50',
+                  )}
+                >
+                  {iconUrl ? (
+                    <img src={iconUrl} alt={wb.name} className='size-7 shrink-0' />
+                  ) : (
+                    <div className='size-7 rounded bg-muted shrink-0' />
+                  )}
+                  <div className='min-w-0 flex-1'>
+                    <div className='font-medium truncate flex items-center justify-between'>
+                      <span>{wb.name.replace(' Whetblade', '')}</span>
+                      <span className={owned ? 'text-emerald-400 font-semibold' : 'text-muted-foreground'}>
+                        {owned ? 'Found' : 'Missing'}
+                      </span>
+                    </div>
+                    <div className='text-[10.5px] text-muted-foreground truncate'>
+                      {wb.affinities.join(', ')}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        {(scaduCount > 0 || reveredCount > 0) && (
+          <>
+            <Separator />
+            <div className='flex flex-col gap-1.5'>
+              <span className='text-xs font-semibold text-muted-foreground uppercase tracking-wider'>
+                Realm of Shadow Blessings
+              </span>
+              <div className='flex flex-col gap-1'>
+                {scaduGood && (
+                  <FlaskItem
+                    item={scaduGood}
+                    valueText={`${scaduCount} / 50 held`}
+                  />
+                )}
+                {reveredGood && (
+                  <FlaskItem
+                    item={reveredGood}
+                    valueText={`${reveredCount} / 25 held`}
+                  />
+                )}
+              </div>
+            </div>
+          </>
+        )}
+      </CardContent>
+    </Card>
   );
 }

@@ -17,6 +17,7 @@ import {
   ChevronDownIcon,
   EyeIcon,
   EyeOffIcon,
+  FlaskConicalIcon,
   LayersIcon,
   LocateFixedIcon,
   MapPinIcon,
@@ -105,6 +106,7 @@ function MapRightRail({
   onQuickSelect,
   onQuickSelectAllUndiscovered,
   onQuickSelectUncollectedItems,
+  onQuickSelectKeyTreasures,
   onClearPins,
   pinCount,
   playerPin,
@@ -118,6 +120,7 @@ function MapRightRail({
   onQuickSelect: (type: 'grace' | 'boss', on: boolean) => void;
   onQuickSelectAllUndiscovered: () => void;
   onQuickSelectUncollectedItems: () => void;
+  onQuickSelectKeyTreasures: () => void;
   onClearPins: () => void;
   pinCount: number;
   playerPin: MapPin | null;
@@ -236,6 +239,14 @@ function MapRightRail({
                 onClick={onQuickSelectUncollectedItems}
               >
                 <PackageIcon className='size-3.5' /> Uncollected Treasures &amp; Items
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='w-full justify-start font-normal text-emerald-500 hover:text-emerald-400'
+                onClick={onQuickSelectKeyTreasures}
+              >
+                <FlaskConicalIcon className='size-3.5' /> Flask Upgrades &amp; Key Items
               </Button>
               <Button
                 variant='ghost'
@@ -654,6 +665,36 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
     }
   };
 
+  const selectKeyTreasures = () => {
+    const keyItemNames = [
+      'Sacred Tear',
+      'Golden Seed',
+      'Larval Tear',
+      'Whetstone Knife',
+      'Iron Whetblade',
+      'Red-Hot Whetblade',
+      'Sanctified Whetblade',
+      'Glintstone Whetblade',
+      'Black Whetblade',
+      'Celestial Dew',
+    ];
+    const tableKeys: InventoryTableType[] = ['tools', 'craftingMaterials', 'talismans'];
+    for (const key of tableKeys) {
+      const matchingItems = (allTables[key].items as InventoryRow[]).filter(
+        (i) =>
+          keyItemNames.some((k) => i.name.includes(k)) &&
+          (i as { hasCoords?: boolean }).hasCoords,
+      );
+      if (matchingItems.length > 0) {
+        setRowSelection(key)((prev) => {
+          const next = { ...prev };
+          for (const i of matchingItems) next[i.id.toString()] = true;
+          return next;
+        });
+      }
+    }
+  };
+
   const selectAllUndiscovered = () => {
     selectEvents('grace', false);
     selectEvents('boss', false);
@@ -752,6 +793,32 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
                   switch
                 </Button>
               ))}
+              {pins.length > 0 && (
+                <div
+                  className={cn(
+                    OVERLAY_PANEL,
+                    'flex items-center gap-2 px-2.5 py-1 text-xs select-none backdrop-blur-sm shadow-md',
+                  )}
+                >
+                  <span className='font-medium text-foreground'>
+                    Showing {visiblePins.length} pin{visiblePins.length === 1 ? '' : 's'}
+                  </span>
+                  {pins.length > visiblePins.length && (
+                    <span className='text-[11px] text-amber-500 font-medium'>
+                      ({pins.length - visiblePins.length} hidden)
+                    </span>
+                  )}
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='h-5 px-1.5 text-[11px] hover:text-foreground hover:bg-muted/80'
+                    onClick={clearPins}
+                    title='Clear all pins'
+                  >
+                    Clear
+                  </Button>
+                </div>
+              )}
             </div>
 
             <MapRightRail
@@ -763,6 +830,7 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
               onQuickSelect={selectEvents}
               onQuickSelectAllUndiscovered={selectAllUndiscovered}
               onQuickSelectUncollectedItems={selectUncollectedItems}
+              onQuickSelectKeyTreasures={selectKeyTreasures}
               onClearPins={clearPins}
               pinCount={pins.length}
               playerPin={playerPin}

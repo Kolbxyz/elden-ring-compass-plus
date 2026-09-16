@@ -59,7 +59,7 @@ export const NAV: readonly NavItem[] = [
   },
   { to: '/graces', label: 'Sites of Grace', icon: FlameIcon },
   { to: '/build', label: 'Calculator', icon: SlidersHorizontalIcon },
-  { to: '/quests', label: 'Quests', icon: ListChecksIcon, preview: true },
+  { to: '/quests', label: 'Quests', icon: ListChecksIcon },
   { to: '/overview', label: 'Overview', icon: LayoutDashboardIcon },
 ];
 

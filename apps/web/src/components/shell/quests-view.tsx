@@ -1,11 +1,13 @@
 import { eventFlagOffset } from '@elden-ring-compass/data';
 import {
+  AlertOctagonIcon,
   AlertTriangleIcon,
   CheckCircle2Icon,
   ChevronDownIcon,
   ChevronUpIcon,
   MapPinIcon,
   RotateCcwIcon,
+  ShieldAlertIcon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -14,7 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { QUESTLINES, type QuestStep } from '@/lib/quests-data';
+import { QUESTLINES, WORLD_CUTOFFS, type QuestStep } from '@/lib/quests-data';
 import { cn } from '@/lib/utils';
 import { inventoryDbView } from '@/lib/vm/inventory';
 import { useSelectedSlot } from '@/stores/slot-selection-store';
@@ -72,7 +74,7 @@ export function QuestsView() {
     return false;
   };
 
-  // Compute status map for each questline: direct match, sequential propagation, manual override
+  // Compute status map for each questline: direct match, sequential propagation, manual override, lockout detection
   const questStatusMap = useMemo(() => {
     const res: Record<
       string,
@@ -81,6 +83,7 @@ export function QuestsView() {
         isDirect: boolean;
         isInferred: boolean;
         isManual: boolean;
+        isLockedOut: boolean;
       }
     > = {};
 
@@ -105,18 +108,39 @@ export function QuestsView() {
 
         const manual = manualOverrides[step.id];
         const finalDone = manual !== undefined ? manual : autoDone;
+        const lockedOut = !finalDone && Boolean(step.lockoutFlagId && isFlagSet(step.lockoutFlagId));
 
         res[step.id] = {
           isDone: finalDone,
           isDirect: direct,
           isInferred: inferred,
           isManual: manual !== undefined,
+          isLockedOut: lockedOut,
         };
       }
     }
 
     return res;
   }, [slot, invItems, manualOverrides]);
+
+  // World cutoff milestones
+  const cutoffStatuses = useMemo(() => {
+    return WORLD_CUTOFFS.map((c) => ({
+      ...c,
+      isTriggered: isFlagSet(c.flagId),
+    }));
+  }, [slot]);
+
+  // Count active quests with locked-out steps
+  const lockedOutStepCount = useMemo(() => {
+    let count = 0;
+    for (const q of QUESTLINES) {
+      for (const s of q.steps) {
+        if (questStatusMap[s.id]?.isLockedOut) count++;
+      }
+    }
+    return count;
+  }, [questStatusMap]);
 
   const toggleExpand = (questId: string) => {
     setExpandedQuests((prev) => ({ ...prev, [questId]: !prev[questId] }));
@@ -256,6 +280,55 @@ export function QuestsView() {
         </Card>
       </div>
 
+      {/* Point-of-No-Return Cutoff Radar */}
+      <Card className='p-3.5 sm:p-4 bg-card/60 backdrop-blur-sm border-amber-500/20'>
+        <div className='flex flex-col lg:flex-row lg:items-center justify-between gap-3'>
+          <div className='space-y-0.5'>
+            <div className='flex items-center gap-2'>
+              <ShieldAlertIcon className='size-4 text-amber-500 shrink-0' />
+              <h3 className='text-sm font-semibold tracking-tight'>Point-of-No-Return Cutoff Radar</h3>
+              {lockedOutStepCount > 0 && (
+                <Badge variant='outline' className='border-rose-500/40 text-rose-400 bg-rose-500/10 text-[10px] font-semibold'>
+                  {lockedOutStepCount} Missable Step{lockedOutStepCount === 1 ? '' : 's'} Locked Out
+                </Badge>
+              )}
+            </div>
+            <p className='text-xs text-muted-foreground'>
+              World-state milestones that irreversibly lock out NPC questlines in your current playthrough.
+            </p>
+          </div>
+          <div className='grid grid-cols-2 sm:grid-cols-4 gap-2 shrink-0'>
+            {cutoffStatuses.map((c) => (
+              <div
+                key={c.id}
+                title={`${c.bossOrEvent}: ${c.impact}`}
+                className={cn(
+                  'flex flex-col p-2 rounded-lg border text-xs transition-all',
+                  c.isTriggered
+                    ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+                    : 'border-border/40 bg-muted/20 text-muted-foreground',
+                )}
+              >
+                <div className='flex items-center justify-between font-medium gap-1'>
+                  <span className='truncate'>{c.name}</span>
+                  <span
+                    className={cn(
+                      'text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded shrink-0',
+                      c.isTriggered ? 'bg-amber-500/20 text-amber-400' : 'bg-muted text-muted-foreground',
+                    )}
+                  >
+                    {c.isTriggered ? 'Triggered' : 'Safe'}
+                  </span>
+                </div>
+                <div className='text-[10px] text-muted-foreground truncate mt-0.5'>
+                  {c.bossOrEvent}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Card>
+
       {/* Filter and Search Bar */}
       <div className='flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between'>
         <div className='flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0'>
@@ -290,7 +363,6 @@ export function QuestsView() {
           const isFullyDone = completedCount === quest.steps.length && quest.steps.length > 0;
           const currentStepIndex = quest.steps.findIndex((s) => !questStatusMap[s.id]?.isDone);
           const nextStep = currentStepIndex !== -1 ? quest.steps[currentStepIndex] : null;
-          const progressPercent = Math.round((completedCount / quest.steps.length) * 100);
 
           return (
             <Card
@@ -334,14 +406,29 @@ export function QuestsView() {
                       <div className='text-xs font-semibold'>
                         {completedCount} / {quest.steps.length} Steps
                       </div>
-                      <div className='w-24 sm:w-28 h-1.5 bg-secondary rounded-full overflow-hidden mt-1'>
-                        <div
-                          className={cn(
-                            'h-full transition-all duration-300',
-                            isFullyDone ? 'bg-emerald-500' : 'bg-amber-500',
-                          )}
-                          style={{ width: `${progressPercent}%` }}
-                        />
+                      <div className='flex items-center gap-1 w-24 sm:w-28 mt-1'>
+                        {quest.steps.map((s, sIdx) => {
+                          const sStatus = questStatusMap[s.id];
+                          const sDone = sStatus?.isDone;
+                          const sLocked = !sDone && sStatus?.isLockedOut;
+                          const isCurr = sIdx === currentStepIndex;
+                          return (
+                            <div
+                              key={s.id}
+                              title={`Step ${s.order}: ${s.title} (${sDone ? 'Completed' : sLocked ? 'Locked Out' : isCurr ? 'Next Objective' : 'Pending'})`}
+                              className={cn(
+                                'h-1.5 flex-1 rounded-full transition-all',
+                                sDone
+                                  ? 'bg-emerald-500'
+                                  : sLocked
+                                    ? 'bg-rose-500/80'
+                                    : isCurr
+                                      ? 'bg-amber-500 ring-1 ring-amber-400/50'
+                                      : 'bg-muted/70',
+                              )}
+                            />
+                          );
+                        })}
                       </div>
                     </div>
 
@@ -401,6 +488,7 @@ export function QuestsView() {
                         isDirect: false,
                         isInferred: false,
                         isManual: false,
+                        isLockedOut: false,
                       };
                       const isDone = status.isDone;
                       const isCurrent = idx === currentStepIndex;
@@ -415,8 +503,9 @@ export function QuestsView() {
                             className={cn(
                               'absolute -left-7 sm:-left-8 top-0.5 size-5 rounded-full border-2 bg-background flex items-center justify-center transition-all cursor-pointer touch-manipulation active:scale-90',
                               isDone && 'border-emerald-500 bg-emerald-500 text-white',
-                              isCurrent && 'border-amber-500 bg-amber-500/20 ring-4 ring-amber-500/20',
-                              !isDone && !isCurrent && 'border-muted-foreground/30 bg-muted/40 hover:border-amber-400',
+                              !isDone && status.isLockedOut && 'border-rose-500 bg-rose-950/40 text-rose-400',
+                              !isDone && !status.isLockedOut && isCurrent && 'border-amber-500 bg-amber-500/20 ring-4 ring-amber-500/20',
+                              !isDone && !status.isLockedOut && !isCurrent && 'border-muted-foreground/30 bg-muted/40 hover:border-amber-400',
                             )}
                           >
                             {isDone && <CheckCircle2Icon className='size-3.5' />}
@@ -428,6 +517,7 @@ export function QuestsView() {
                               className={cn(
                                 'text-xs sm:text-sm font-semibold tracking-tight',
                                 isDone && 'text-muted-foreground line-through opacity-80',
+                                !isDone && status.isLockedOut && 'text-rose-400/80',
                                 isCurrent && 'text-amber-400 font-bold',
                               )}
                             >
@@ -448,7 +538,7 @@ export function QuestsView() {
                               </Badge>
                             )}
 
-                            {isDone && (
+                            {isDone ? (
                               <Badge
                                 variant='outline'
                                 className={cn(
@@ -457,18 +547,33 @@ export function QuestsView() {
                                 )}
                               >
                                 {status.isManual
-                                  ? 'Manual check'
+                                  ? 'Manual'
                                   : status.isDirect
-                                    ? 'Save verified'
-                                    : 'Completed'}
+                                    ? 'Auto-detected'
+                                    : 'Inferred'}
                               </Badge>
-                            )}
+                            ) : status.isLockedOut ? (
+                              <Badge
+                                variant='outline'
+                                className='text-[9px] sm:text-[10px] border-rose-500/40 bg-rose-500/15 text-rose-400 font-semibold'
+                              >
+                                Locked Out
+                              </Badge>
+                            ) : null}
                           </div>
 
                           {/* Step Description */}
                           <p className='text-xs leading-relaxed text-muted-foreground max-w-3xl'>
                             {step.description}
                           </p>
+
+                          {/* Locked out alert */}
+                          {!isDone && status.isLockedOut && (
+                            <div className='flex items-center gap-1.5 text-xs text-rose-400 mt-0.5 font-medium'>
+                              <AlertOctagonIcon className='size-3.5 shrink-0 text-rose-400' />
+                              <span>Cutoff reached: This step can no longer be progressed in this playthrough.</span>
+                            </div>
+                          )}
 
                           {/* Warnings / Prerequisites */}
                           {step.requiresBefore && (

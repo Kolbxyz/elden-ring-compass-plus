@@ -105,6 +105,15 @@ export const REMEMBRANCES = [
   { name: 'Remembrance of the Naturalborn', goodId: 2964, bossFlagId: 12040800 },
 ] as const;
 
+export const WHETBLADES = [
+  { id: 8590, name: 'Whetstone Knife', affinities: ['Standard'] },
+  { id: 8970, name: 'Iron Whetblade', affinities: ['Heavy', 'Keen', 'Quality'] },
+  { id: 8971, name: 'Red-Hot Whetblade', affinities: ['Fire', 'Flame Art'] },
+  { id: 8972, name: 'Sanctified Whetblade', affinities: ['Lightning', 'Sacred'] },
+  { id: 8973, name: 'Glintstone Whetblade', affinities: ['Magic', 'Frost'] },
+  { id: 8974, name: 'Black Whetblade', affinities: ['Poison', 'Blood', 'Occult'] },
+] as const;
+
 export function useCompletion(): CompletionModel {
   const slot = useSelectedSlot();
   const tables = useInventoryTables();
@@ -217,6 +226,12 @@ export function useCompletion(): CompletionModel {
     const unusedSacredTears = sacredTearGood ? (inventoryQuantityById.get(sacredTearGood.id) ?? 0) : 0;
     const sacredTearsFound = Math.min(12, crimsonFlaskPotency + unusedSacredTears);
 
+    const ownedWhetblades = WHETBLADES.filter((wb) => ownedIds.has(wb.id)).length;
+    const larvalTears =
+      (inventoryQuantityById.get(8185) ?? 0) + (inventoryQuantityById.get(2008033) ?? 0);
+    const scaduFragments = inventoryQuantityById.get(2010000) ?? 0;
+    const reveredAshes = inventoryQuantityById.get(2010100) ?? 0;
+
     const milestones: Milestone[] = [
       {
         key: 'greatRunes',
@@ -236,7 +251,36 @@ export function useCompletion(): CompletionModel {
         total: 12,
         owned: sacredTearsFound,
       },
+      {
+        key: 'whetblades',
+        label: 'Whetblades',
+        total: WHETBLADES.length,
+        owned: ownedWhetblades,
+      },
+      {
+        key: 'larvalTears',
+        label: 'Larval Tears',
+        total: 18,
+        owned: larvalTears,
+      },
     ];
+
+    if (scaduFragments > 0 || reveredAshes > 0) {
+      milestones.push(
+        {
+          key: 'scaduFragments',
+          label: 'Scadutree Fragments',
+          total: 50,
+          owned: scaduFragments,
+        },
+        {
+          key: 'reveredAshes',
+          label: 'Revered Spirit Ashes',
+          total: 25,
+          owned: reveredAshes,
+        },
+      );
+    }
 
     return { hasSave: !!slot, overallPct, categories, milestones };
   }, [slot, tables]);
