@@ -600,8 +600,8 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
       <div
         className='relative isolate w-full overflow-hidden rounded-lg border border-muted'
         // Taller than the old layout — the controls float on the map now, so the
-        // height they used to occupy below it goes to the map itself.
-        style={{ height: embedded ? 'min(78vh, 860px)' : 720 }}
+        // height they used to occupy below it goes to the map itself. Responsive on mobile.
+        style={{ height: embedded ? 'min(78vh, 860px)' : 'min(78vh, 720px)' }}
       >
         {error ? (
           <MapFallback message={`Failed to load map: ${error}`} />

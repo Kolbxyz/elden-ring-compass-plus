@@ -178,30 +178,30 @@ export function QuestsView() {
   }, [questStatusMap]);
 
   return (
-    <div className='flex flex-1 flex-col gap-6 p-4 md:p-8 max-w-7xl mx-auto w-full'>
+    <div className='flex flex-1 flex-col gap-4 sm:gap-6 p-3 sm:p-6 md:p-8 max-w-7xl mx-auto w-full'>
       {/* Page Header */}
-      <div className='flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border/40 pb-6'>
+      <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-border/40 pb-4 sm:pb-6'>
         <div className='space-y-1'>
           <div className='flex items-center gap-2'>
-            <h1 className='text-3xl font-bold tracking-tight'>Quest Compass</h1>
-            <Badge variant='outline' className='text-amber-500 border-amber-500/30 bg-amber-500/10'>
+            <h1 className='text-2xl sm:text-3xl font-bold tracking-tight'>Quest Compass</h1>
+            <Badge variant='outline' className='text-amber-500 border-amber-500/30 bg-amber-500/10 text-[10px] sm:text-xs'>
               Save-Aware
             </Badge>
           </div>
-          <p className='text-sm text-muted-foreground max-w-2xl'>
+          <p className='text-xs sm:text-sm text-muted-foreground max-w-2xl'>
             Interactive quest tracker evaluating real-time event flags, inventory items, and grace
             checkpoints from your Elden Ring save file. Discover your next objective and avoid locking
             yourself out of vital storylines.
           </p>
         </div>
 
-        <div className='flex items-center gap-3'>
+        <div className='flex items-center gap-2 sm:gap-3 shrink-0'>
           {hasManualOverrides && (
             <Button
               variant='outline'
               size='sm'
               onClick={resetOverrides}
-              className='text-xs flex items-center gap-1.5'
+              className='text-xs h-8 sm:h-9 flex items-center gap-1.5'
             >
               <RotateCcwIcon className='size-3.5' />
               Reset Checks
@@ -212,59 +212,59 @@ export function QuestsView() {
       </div>
 
       {/* Progress & Stat Cards */}
-      <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-        <Card className='p-4 bg-card/60 backdrop-blur-sm'>
-          <div className='text-xs text-muted-foreground uppercase font-medium'>Total Questlines</div>
-          <div className='text-2xl font-bold mt-1'>{QUESTLINES.length}</div>
-          <div className='text-xs text-muted-foreground mt-0.5'>Tracked NPC paths</div>
+      <div className='grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4'>
+        <Card className='p-3 sm:p-4 bg-card/60 backdrop-blur-sm'>
+          <div className='text-[10px] sm:text-xs text-muted-foreground uppercase font-medium'>Total Questlines</div>
+          <div className='text-xl sm:text-2xl font-bold mt-0.5 sm:mt-1'>{QUESTLINES.length}</div>
+          <div className='text-[10px] sm:text-xs text-muted-foreground mt-0.5'>Tracked NPC paths</div>
         </Card>
 
-        <Card className='p-4 bg-card/60 backdrop-blur-sm'>
-          <div className='text-xs text-muted-foreground uppercase font-medium'>Steps Completed</div>
-          <div className='text-2xl font-bold mt-1 text-emerald-500'>
+        <Card className='p-3 sm:p-4 bg-card/60 backdrop-blur-sm'>
+          <div className='text-[10px] sm:text-xs text-muted-foreground uppercase font-medium'>Steps Completed</div>
+          <div className='text-xl sm:text-2xl font-bold mt-0.5 sm:mt-1 text-emerald-500'>
             {stats.completedSteps}{' '}
-            <span className='text-sm font-normal text-muted-foreground'>/ {stats.totalSteps}</span>
+            <span className='text-xs sm:text-sm font-normal text-muted-foreground'>/ {stats.totalSteps}</span>
           </div>
-          <div className='text-xs text-muted-foreground mt-0.5'>{stats.pct}% total progression</div>
+          <div className='text-[10px] sm:text-xs text-muted-foreground mt-0.5'>{stats.pct}% total progression</div>
         </Card>
 
-        <Card className='p-4 bg-card/60 backdrop-blur-sm'>
-          <div className='text-xs text-muted-foreground uppercase font-medium'>Quests Finished</div>
-          <div className='text-2xl font-bold mt-1 text-amber-500'>
+        <Card className='p-3 sm:p-4 bg-card/60 backdrop-blur-sm'>
+          <div className='text-[10px] sm:text-xs text-muted-foreground uppercase font-medium'>Quests Finished</div>
+          <div className='text-xl sm:text-2xl font-bold mt-0.5 sm:mt-1 text-amber-500'>
             {stats.completedQuests}{' '}
-            <span className='text-sm font-normal text-muted-foreground'>/ {QUESTLINES.length}</span>
+            <span className='text-xs sm:text-sm font-normal text-muted-foreground'>/ {QUESTLINES.length}</span>
           </div>
-          <div className='text-xs text-muted-foreground mt-0.5'>Terminal states reached</div>
+          <div className='text-[10px] sm:text-xs text-muted-foreground mt-0.5'>Terminal states reached</div>
         </Card>
 
-        <Card className='p-4 bg-card/60 backdrop-blur-sm'>
-          <div className='text-xs text-muted-foreground uppercase font-medium'>Save Status</div>
-          <div className='text-2xl font-bold mt-1 flex items-center gap-2'>
+        <Card className='p-3 sm:p-4 bg-card/60 backdrop-blur-sm'>
+          <div className='text-[10px] sm:text-xs text-muted-foreground uppercase font-medium'>Save Status</div>
+          <div className='text-xl sm:text-2xl font-bold mt-0.5 sm:mt-1 flex items-center gap-2'>
             {connected ? (
-              <span className='text-emerald-500 text-lg flex items-center gap-1.5'>
+              <span className='text-emerald-500 text-base sm:text-lg flex items-center gap-1.5'>
                 <span className='size-2 rounded-full bg-emerald-500' />
                 Connected
               </span>
             ) : (
-              <span className='text-muted-foreground text-base font-medium'>No Save Loaded</span>
+              <span className='text-muted-foreground text-sm sm:text-base font-medium'>No Save Loaded</span>
             )}
           </div>
-          <div className='text-xs text-muted-foreground mt-0.5'>
+          <div className='text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate'>
             {slot ? slot.player_game_data.character_name : 'Static guide mode'}
           </div>
         </Card>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className='flex flex-col sm:flex-row gap-3 items-center justify-between'>
-        <div className='flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0'>
+      <div className='flex flex-col sm:flex-row gap-2.5 sm:gap-3 items-stretch sm:items-center justify-between'>
+        <div className='flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0'>
           {['All', 'Major Ending', 'Companion'].map((cat) => (
             <Button
               key={cat}
               variant={selectedCategory === cat ? 'default' : 'outline'}
               size='sm'
               onClick={() => setSelectedCategory(cat)}
-              className='text-xs'
+              className='text-xs h-8 px-2.5 shrink-0'
             >
               {cat === 'All' ? 'All Quests' : cat}
             </Button>
@@ -276,7 +276,7 @@ export function QuestsView() {
             placeholder='Search NPC, location, or item...'
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className='h-9 text-xs'
+            className='h-8 sm:h-9 text-xs'
           />
         </div>
       </div>
@@ -301,22 +301,22 @@ export function QuestsView() {
             >
               {/* Card Header & Summary Bar */}
               <CardHeader
-                className='p-4 sm:p-6 cursor-pointer'
+                className='p-3.5 sm:p-6 cursor-pointer select-none'
                 onClick={() => toggleExpand(quest.id)}
               >
-                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-3'>
-                  <div className='space-y-1.5'>
-                    <div className='flex flex-wrap items-center gap-2'>
-                      <CardTitle className='text-lg font-bold hover:text-amber-500 transition-colors'>
+                <div className='flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 sm:gap-3'>
+                  <div className='space-y-1 sm:space-y-1.5'>
+                    <div className='flex flex-wrap items-center gap-1.5 sm:gap-2'>
+                      <CardTitle className='text-base sm:text-lg font-bold hover:text-amber-500 transition-colors'>
                         {quest.name}
                       </CardTitle>
-                      <Badge variant='secondary' className='text-[11px] font-normal'>
+                      <Badge variant='secondary' className='text-[10px] sm:text-[11px] font-normal'>
                         {quest.category}
                       </Badge>
                       {quest.endingLink && (
                         <Badge
                           variant='outline'
-                          className='text-[11px] border-amber-500/40 text-amber-500 bg-amber-500/5'
+                          className='text-[10px] sm:text-[11px] border-amber-500/40 text-amber-500 bg-amber-500/5'
                         >
                           {quest.endingLink}
                         </Badge>
@@ -328,12 +328,12 @@ export function QuestsView() {
                   </div>
 
                   {/* Progress Pill and Toggle */}
-                  <div className='flex items-center gap-4 self-end sm:self-center shrink-0'>
-                    <div className='text-right'>
+                  <div className='flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto pt-2 sm:pt-0 border-t border-border/20 sm:border-t-0 shrink-0'>
+                    <div className='text-left sm:text-right'>
                       <div className='text-xs font-semibold'>
                         {completedCount} / {quest.steps.length} Steps
                       </div>
-                      <div className='w-28 h-1.5 bg-secondary rounded-full overflow-hidden mt-1'>
+                      <div className='w-24 sm:w-28 h-1.5 bg-secondary rounded-full overflow-hidden mt-1'>
                         <div
                           className={cn(
                             'h-full transition-all duration-300',
@@ -344,7 +344,7 @@ export function QuestsView() {
                       </div>
                     </div>
 
-                    <Button variant='ghost' size='icon' className='size-8'>
+                    <Button variant='ghost' size='icon' className='size-8 shrink-0'>
                       {isExpanded ? (
                         <ChevronUpIcon className='size-4 text-muted-foreground' />
                       ) : (
@@ -356,9 +356,9 @@ export function QuestsView() {
 
                 {/* Immediate Next Step Callout */}
                 {!isFullyDone && nextStep && (
-                  <div className='mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
-                    <div className='flex items-start sm:items-center gap-2.5'>
-                      <div className='size-6 rounded-full bg-amber-500/20 text-amber-500 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 sm:mt-0'>
+                  <div className='mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
+                    <div className='flex items-start sm:items-center gap-2 sm:gap-2.5'>
+                      <div className='size-5 sm:size-6 rounded-full bg-amber-500/20 text-amber-500 text-[11px] sm:text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 sm:mt-0'>
                         {nextStep.order}
                       </div>
                       <div>
@@ -383,7 +383,7 @@ export function QuestsView() {
                 )}
 
                 {isFullyDone && (
-                  <div className='mt-3 flex items-center gap-2 text-xs text-emerald-400 font-medium'>
+                  <div className='mt-2.5 sm:mt-3 flex items-center gap-2 text-xs text-emerald-400 font-medium'>
                     <CheckCircle2Icon className='size-4 text-emerald-500' />
                     Questline Completed in this save.
                   </div>
@@ -392,8 +392,8 @@ export function QuestsView() {
 
               {/* Step Timeline */}
               {isExpanded && (
-                <CardContent className='pt-0 pb-6 px-4 sm:px-6 border-t border-border/20 mt-2'>
-                  <div className='relative pl-6 sm:pl-8 space-y-6 before:absolute before:left-2 sm:before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60 mt-4'>
+                <CardContent className='pt-0 pb-4 sm:pb-6 px-3.5 sm:px-6 border-t border-border/20 mt-2'>
+                  <div className='relative pl-7 sm:pl-8 space-y-4 sm:space-y-6 before:absolute before:left-2.5 sm:before:left-3 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60 mt-3 sm:mt-4'>
                     {quest.steps.map((step, idx) => {
                       const status = questStatusMap[step.id] ?? {
                         isDone: false,
@@ -405,27 +405,27 @@ export function QuestsView() {
                       const isCurrent = idx === currentStepIndex;
 
                       return (
-                        <div key={step.id} className='relative flex flex-col gap-1.5'>
-                          {/* Dot / Indicator — Clickable to toggle manual check */}
+                        <div key={step.id} className='relative flex flex-col gap-1 sm:gap-1.5'>
+                          {/* Dot / Indicator — Clickable with touch-manipulation and comfortable tap target */}
                           <button
                             type='button'
                             title={isDone ? 'Click to mark uncompleted' : 'Click to mark completed'}
                             onClick={(e) => handleStepToggle(step.id, isDone, e)}
                             className={cn(
-                              'absolute -left-6 sm:-left-8 top-0.5 size-4 rounded-full border-2 bg-background flex items-center justify-center transition-all cursor-pointer hover:scale-125 focus:outline-none',
+                              'absolute -left-7 sm:-left-8 top-0.5 size-5 rounded-full border-2 bg-background flex items-center justify-center transition-all cursor-pointer touch-manipulation active:scale-90',
                               isDone && 'border-emerald-500 bg-emerald-500 text-white',
                               isCurrent && 'border-amber-500 bg-amber-500/20 ring-4 ring-amber-500/20',
                               !isDone && !isCurrent && 'border-muted-foreground/30 bg-muted/40 hover:border-amber-400',
                             )}
                           >
-                            {isDone && <CheckCircle2Icon className='size-3' />}
+                            {isDone && <CheckCircle2Icon className='size-3.5' />}
                           </button>
 
                           {/* Step Header */}
-                          <div className='flex flex-wrap items-center gap-2'>
+                          <div className='flex flex-wrap items-center gap-1.5 sm:gap-2'>
                             <span
                               className={cn(
-                                'text-sm font-semibold tracking-tight',
+                                'text-xs sm:text-sm font-semibold tracking-tight',
                                 isDone && 'text-muted-foreground line-through opacity-80',
                                 isCurrent && 'text-amber-400 font-bold',
                               )}
@@ -433,15 +433,15 @@ export function QuestsView() {
                               Step {step.order}: {step.title}
                             </span>
 
-                            <div className='flex items-center gap-1 text-[11px] text-muted-foreground bg-secondary/40 px-2 py-0.5 rounded-full'>
-                              <MapPinIcon className='size-3 text-muted-foreground' />
+                            <div className='flex items-center gap-1 text-[10px] sm:text-[11px] text-muted-foreground bg-secondary/40 px-2 py-0.5 rounded-full'>
+                              <MapPinIcon className='size-2.5 sm:size-3 text-muted-foreground' />
                               <span>{step.location}</span>
                             </div>
 
                             {step.missable && (
                               <Badge
                                 variant='outline'
-                                className='text-[10px] text-rose-400 border-rose-500/30 bg-rose-500/10'
+                                className='text-[9px] sm:text-[10px] text-rose-400 border-rose-500/30 bg-rose-500/10'
                               >
                                 Missable
                               </Badge>
@@ -451,7 +451,7 @@ export function QuestsView() {
                               <Badge
                                 variant='outline'
                                 className={cn(
-                                  'text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
+                                  'text-[9px] sm:text-[10px] border-emerald-500/30 bg-emerald-500/10 text-emerald-400',
                                   status.isManual && 'border-sky-500/30 bg-sky-500/10 text-sky-400',
                                 )}
                               >
