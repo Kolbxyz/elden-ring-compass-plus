@@ -248,7 +248,7 @@ export const QUESTLINES: readonly Questline[] = [
           'After reaching Altus Plateau, talk to Corhyn in Roundtable Hold. He will depart to find Goldmask. Meet him on the road north of Altus Highway Junction.',
         flagId: 1038500200,
         altFlagIds: [1038500201, 1038500500, 1038507000, 1038507010],
-        graceFlagIds: [76201, 76202, 76230],
+        graceFlagIds: [76201, 76202],
       },
       {
         id: 'goldmask-2',
@@ -264,9 +264,11 @@ export const QUESTLINES: readonly Questline[] = [
           1038517080,
           1038518500,
           1038518540,
+          1038547000,
+          1038547010,
+          1038547020,
         ],
         itemNames: ['Discus of Light'],
-        graceFlagIds: [76230],
         rewards: ['Discus of Light available for purchase'],
       },
       {
@@ -277,20 +279,8 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Obtain the Golden Order Principia from the sanctuary rafters. Learn Law of Regression (37 INT). Cast it while standing on the message reading "Regression alone reveals secrets" below the sanctuary, then report the truth to Goldmask.',
         flagId: 1038500230,
-        altFlagIds: [
-          1038547000,
-          1038547010,
-          1038547020,
-          1038547050,
-          1038547060,
-          1038547700,
-        ],
-        itemNames: [
-          "Radagon's Rings of Light",
-          'Golden Order Principia',
-          'Law of Regression',
-        ],
-        graceFlagIds: [71110, 71101],
+        altFlagIds: [1038547700],
+        itemNames: ["Radagon's Rings of Light"],
         requiresBefore: 'Must solve BEFORE defeating Maliketh in Farum Azula',
         missable: true,
       },
@@ -303,7 +293,6 @@ export const QUESTLINES: readonly Questline[] = [
           'Find Goldmask and Corhyn on the bridge southwest of Stargazer’s Ruins. Talk to Corhyn about his growing doubts regarding Goldmask’s calculations.',
         flagId: 1038500250,
         itemNames: ['Immutable Shield'],
-        graceFlagIds: [76332, 76321],
       },
       {
         id: 'goldmask-5',
@@ -366,14 +355,12 @@ export const QUESTLINES: readonly Questline[] = [
       {
         id: 'millicent-4',
         order: 4,
-        title: 'Windmill Village Godskin Defeat',
+        title: 'Speak to Millicent at Windmill Village',
         location: 'Altus Plateau — Dominula, Windmill Village',
         description:
-          'Defeat the Godskin Apostle at the summit of Dominula. Rest at the Windmill Heights grace and speak to Millicent admiring the landscape.',
+          'After defeating the Godskin Apostle at the summit of Dominula, rest at the Windmill Heights grace and speak to Millicent admiring the landscape.',
         flagId: 1041500140,
-        bossFlagIds: [1042550800, 34130800], // Godskin Apostle in Dominula
-        itemNames: ['Godskin Peeler', 'Scouring Black Flame'],
-        graceFlagIds: [76231], // Windmill Heights grace
+        altFlagIds: [1041500145],
       },
       {
         id: 'millicent-5',
@@ -383,7 +370,6 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Talk to Millicent at the Ancient Snow Valley Ruins grace in Mountaintops. Later, meet her in the Prayer Room inside Elphael, Brace of the Haligtree.',
         flagId: 1041500155,
-        graceFlagIds: [71501, 71502], // Prayer Room, Elphael
       },
       {
         id: 'millicent-6',

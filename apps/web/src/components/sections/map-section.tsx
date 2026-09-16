@@ -15,6 +15,7 @@
  */
 import {
   ChevronDownIcon,
+  EyeIcon,
   EyeOffIcon,
   LayersIcon,
   LocateFixedIcon,
@@ -124,7 +125,29 @@ function MapRightRail({
     // map on short viewports; pointer-events pass through everywhere but the
     // actual buttons/panels.
     <div className='pointer-events-none absolute inset-y-3 right-3 z-[1000] flex flex-col items-end gap-2'>
-      <div className='flex gap-2'>
+      <div className='flex items-center gap-2'>
+        <Button
+          variant={hideCompleted ? 'default' : 'outline'}
+          size='sm'
+          aria-label={hideCompleted ? 'Show completed icons' : 'Hide completed icons'}
+          title={
+            hideCompleted
+              ? 'Showing only uncollected & undiscovered — click to show all'
+              : 'Hide collected items, discovered graces & defeated bosses'
+          }
+          className={cn(
+            'pointer-events-auto h-9 gap-1.5 px-2.5 text-xs font-medium shadow-md backdrop-blur-sm',
+            !hideCompleted && OVERLAY_BUTTON,
+          )}
+          onClick={() => onHideCompletedChange(!hideCompleted)}
+        >
+          {hideCompleted ? (
+            <EyeOffIcon className='size-3.5 shrink-0' />
+          ) : (
+            <EyeIcon className='size-3.5 shrink-0 text-muted-foreground' />
+          )}
+          <span>{hideCompleted ? 'Uncollected Only' : 'Hide Collected'}</span>
+        </Button>
         <Button
           variant='outline'
           size='icon'
@@ -141,7 +164,7 @@ function MapRightRail({
           size='icon'
           aria-label={controlsOpen ? 'Hide map controls' : 'Show map controls'}
           aria-expanded={controlsOpen}
-          title='Map controls'
+          title='Map controls & layers'
           className={cn('pointer-events-auto', OVERLAY_BUTTON)}
           onClick={() => setControlsOpen((o) => !o)}
         >
