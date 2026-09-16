@@ -223,10 +223,35 @@ export function OverviewSection() {
       .toReversed()
       .find((flask) => (inventoryQuantityById.get(flask.id) ?? 0) > 0) ?? baseFlaskItem;
 
-  const ceruleanFlask = assertDefined(
+  const getFlaskPotency = (name: string) => {
+    const match = name.match(/\+(\d+)/);
+    return match && match[1] ? Number(match[1]) : 0;
+  };
+
+  const crimsonFlask = usersFlask;
+  const crimsonPotency = getFlaskPotency(crimsonFlask.name);
+
+  const baseCeruleanItem = assertDefined(
     goodsByName.get('Flask of Cerulean Tears'),
     'Flask of Cerulean Tears missing from data',
   );
+
+  const usersCeruleanFlask =
+    Array.from({ length: 12 })
+      .map((_, i) =>
+        goodsByName.get(`${baseCeruleanItem.name}${i == 0 ? '' : ` +${(i + 1).toString()}`}`),
+      )
+      .filter((flask) => flask !== undefined)
+      .toReversed()
+      .find((flask) => (inventoryQuantityById.get(flask.id) ?? 0) > 0) ?? baseCeruleanItem;
+  const ceruleanPotency = getFlaskPotency(usersCeruleanFlask.name);
+
+  const sacredTearGood = goodsByName.get('Sacred Tear');
+  const unusedSacredTears = sacredTearGood ? (inventoryQuantityById.get(sacredTearGood.id) ?? 0) : 0;
+  const sacredTearsFound = Math.min(12, crimsonPotency + unusedSacredTears);
+
+  const goldenSeedGood = goodsByName.get('Golden Seed');
+  const unusedSeeds = goldenSeedGood ? (inventoryQuantityById.get(goldenSeedGood.id) ?? 0) : 0;
 
   return (
     <>
@@ -249,13 +274,16 @@ export function OverviewSection() {
           </CardDescription>
         </CardHeader>
         <CardContent className='flex flex-col gap-1'>
-          <FlaskItem item={usersFlask} max={14} />
+          <FlaskItem item={crimsonFlask} valueText={`Potency +${crimsonPotency} / +12`} />
           <Separator />
-          <FlaskItem item={ceruleanFlask} max={14} />
+          <FlaskItem item={usersCeruleanFlask} valueText={`Potency +${ceruleanPotency} / +12`} />
           <Separator />
-          <FlaskItem item={goodsByName.get('Golden Seed')} max={30} />
+          <FlaskItem item={goldenSeedGood} valueText={`${unusedSeeds} in bag`} />
           <Separator />
-          <FlaskItem item={goodsByName.get('Sacred Tear')} max={12} />
+          <FlaskItem
+            item={sacredTearGood}
+            valueText={`${sacredTearsFound} / 12 found (${crimsonPotency} used)`}
+          />
           <Separator />
           <WondrousPhysick />
         </CardContent>
@@ -459,10 +487,10 @@ function WondrousPhysick() {
 
 function FlaskItem({
   item,
-  max,
+  valueText,
 }: {
   item: { id: number; name: string; icon: number } | undefined;
-  max: number;
+  valueText?: string;
 }) {
   const slot = useSelectedSlot();
   const inventoryQuantityById = new Map(
@@ -475,9 +503,9 @@ function FlaskItem({
     <div className='flex items-center justify-between gap-10 rounded-lg transition-colors hover:bg-muted/50'>
       <TooltipImg imgSrc={imgSrc} thumbSrc={itemIconThumbUrl(item.icon)} />
       <div className='flex flex-col items-end p-2'>
-        <p>{item.name}</p>
+        <p className='text-sm font-medium'>{item.name}</p>
         <p className='text-sm text-muted-foreground'>
-          {inventoryQuantityById.get(item.id) ?? 0} / {max}
+          {valueText ?? `${inventoryQuantityById.get(item.id) ?? 0}`}
         </p>
       </div>
     </div>

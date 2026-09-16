@@ -1,5 +1,4 @@
 import { Link } from '@tanstack/react-router';
-import { CheckIcon, TrophyIcon } from 'lucide-react';
 
 import {
   equippedHelmIconUrl,
@@ -138,15 +137,14 @@ export function CompletionBreakdown() {
 function MilestoneChips({ milestones }: { milestones: Milestone[] }) {
   return (
     <div className='flex flex-col gap-2 border-t border-border pt-4'>
-      <span className='flex items-center gap-1.5 text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'>
-        <TrophyIcon className='size-3.5' /> Milestones
+      <span className='text-[11px] font-semibold tracking-wide text-muted-foreground uppercase'>
+        Milestones
       </span>
       <div className='flex flex-wrap gap-2'>
         {milestones.map((m) => {
           const done = m.total > 0 && m.owned >= m.total;
           return (
-            <Badge key={m.key} variant={done ? 'default' : 'secondary'} className='gap-1'>
-              {done && <CheckIcon className='size-3' />}
+            <Badge key={m.key} variant={done ? 'default' : 'secondary'} className='text-xs'>
               {m.label} {m.owned}/{m.total}
             </Badge>
           );

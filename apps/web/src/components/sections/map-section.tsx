@@ -33,6 +33,7 @@ import { useDataTableData } from '@/lib/data-table-data';
 import { cn } from '@/lib/utils';
 import { wikiNameForItem } from '@/lib/wiki';
 import {
+  type InventoryRow,
   type InventoryTableType,
   TABLE_PLACEMENT_TYPE,
   useInventoryTables,
@@ -102,6 +103,8 @@ function MapRightRail({
   hideCompleted,
   onHideCompletedChange,
   onQuickSelect,
+  onQuickSelectAllUndiscovered,
+  onQuickSelectUncollectedItems,
   onClearPins,
   pinCount,
   playerPin,
@@ -113,6 +116,8 @@ function MapRightRail({
   hideCompleted: boolean;
   onHideCompletedChange: (hide: boolean) => void;
   onQuickSelect: (type: 'grace' | 'boss', on: boolean) => void;
+  onQuickSelectAllUndiscovered: () => void;
+  onQuickSelectUncollectedItems: () => void;
   onClearPins: () => void;
   pinCount: number;
   playerPin: MapPin | null;
@@ -219,21 +224,18 @@ function MapRightRail({
               <Button
                 variant='ghost'
                 size='sm'
-                className='w-full justify-start font-normal text-amber-500 hover:text-amber-400'
-                onClick={() => {
-                  onQuickSelect('grace', false);
-                  onQuickSelect('boss', false);
-                }}
+                className='w-full justify-start font-medium text-amber-500 hover:text-amber-400'
+                onClick={onQuickSelectAllUndiscovered}
               >
-                <MapPinIcon /> All Undiscovered
+                <MapPinIcon className='size-3.5' /> All Undiscovered (Graces + Bosses + Items)
               </Button>
               <Button
                 variant='ghost'
                 size='sm'
-                className='w-full justify-start font-normal'
-                onClick={() => onQuickSelect('grace', true)}
+                className='w-full justify-start font-normal text-cyan-500 hover:text-cyan-400'
+                onClick={onQuickSelectUncollectedItems}
               >
-                <MapPinIcon className='text-amber-400' /> Discovered Graces
+                <PackageIcon className='size-3.5' /> Uncollected Treasures &amp; Items
               </Button>
               <Button
                 variant='ghost'
@@ -241,15 +243,15 @@ function MapRightRail({
                 className='w-full justify-start font-normal'
                 onClick={() => onQuickSelect('grace', false)}
               >
-                <MapPinIcon /> Undiscovered Graces
+                <MapPinIcon className='size-3.5' /> Undiscovered Graces
               </Button>
               <Button
                 variant='ghost'
                 size='sm'
                 className='w-full justify-start font-normal'
-                onClick={() => onQuickSelect('boss', true)}
+                onClick={() => onQuickSelect('grace', true)}
               >
-                <SkullIcon /> Completed Bosses
+                <MapPinIcon className='size-3.5 text-amber-400' /> Discovered Graces
               </Button>
               <Button
                 variant='ghost'
@@ -257,7 +259,15 @@ function MapRightRail({
                 className='w-full justify-start font-normal'
                 onClick={() => onQuickSelect('boss', false)}
               >
-                <SkullIcon /> Incomplete Bosses
+                <SkullIcon className='size-3.5' /> Incomplete Bosses
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='w-full justify-start font-normal'
+                onClick={() => onQuickSelect('boss', true)}
+              >
+                <SkullIcon className='size-3.5' /> Completed Bosses
               </Button>
             </div>
           </div>
@@ -571,6 +581,7 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
     [pinCountByMaster, activeMapId],
   );
   const eventsItems = useDataTableData('events');
+  const allTables = useInventoryTables();
   const { setRowSelection, clearAllRowSelection: clearPins } = useRowSelectionControls();
 
   useEffect(() => {
@@ -616,6 +627,37 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
       for (const e of matches) next[e.id.toString()] = true;
       return next;
     });
+  };
+
+  const selectUncollectedItems = () => {
+    const tableKeys: InventoryTableType[] = [
+      'armaments',
+      'armor',
+      'talismans',
+      'spells',
+      'ashes',
+      'spirits',
+      'tools',
+      'craftingMaterials',
+    ];
+    for (const key of tableKeys) {
+      const uncollectedWithCoords = (allTables[key].items as InventoryRow[]).filter(
+        (i) => i.quantity === 0 && (i as { hasCoords?: boolean }).hasCoords,
+      );
+      if (uncollectedWithCoords.length > 0) {
+        setRowSelection(key)((prev) => {
+          const next = { ...prev };
+          for (const i of uncollectedWithCoords) next[i.id.toString()] = true;
+          return next;
+        });
+      }
+    }
+  };
+
+  const selectAllUndiscovered = () => {
+    selectEvents('grace', false);
+    selectEvents('boss', false);
+    selectUncollectedItems();
   };
 
   return (
@@ -719,6 +761,8 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
               hideCompleted={hideCompleted}
               onHideCompletedChange={setHideCompleted}
               onQuickSelect={selectEvents}
+              onQuickSelectAllUndiscovered={selectAllUndiscovered}
+              onQuickSelectUncollectedItems={selectUncollectedItems}
               onClearPins={clearPins}
               pinCount={pins.length}
               playerPin={playerPin}

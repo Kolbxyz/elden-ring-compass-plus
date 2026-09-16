@@ -368,9 +368,9 @@ function MarkerLayer({ pins, zoom }: { pins: MapPin[]; zoom: number }) {
   const map = useMap();
   return (
     <>
-      {pins.map((pin, i) => (
+      {pins.map((pin) => (
         <Marker
-          key={i}
+          key={`${pin.kind}-${pin.name}-${pin.master}-${Math.round(pin.px)}-${Math.round(pin.py)}-${pin.discovered ? '1' : '0'}`}
           position={map.unproject([pin.px, pin.py], zoom)}
           icon={pinIcon(pin.category, pin.discovered)}
         >

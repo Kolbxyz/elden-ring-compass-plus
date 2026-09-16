@@ -9,10 +9,11 @@
 // (inventory-catalog.ts), so the counts here are clean.
 import { useMemo } from 'react';
 
-import { ARMOR, GOODS } from '@elden-ring-compass/data';
+import { ARMOR } from '@elden-ring-compass/data';
 import { itemIconUrl } from '@elden-ring-compass/data/images';
 
 import { useSelectedSlot } from '@/stores/slot-selection-store';
+import { goodsByName } from './game-data';
 import { type InventoryRow, useInventoryTables } from './inventory-catalog';
 import { Slot } from './save-dto';
 import { eventsDbView } from './vm/events';
@@ -76,15 +77,33 @@ export function equippedHelmIconUrl(slot?: Readonly<Slot>): string | undefined {
   return icon != null ? (itemIconUrl(icon) ?? undefined) : undefined;
 }
 
-// Curated "collect them all" sets — clean GOODS categories (counts verified 2026-06-07).
-const MILESTONE_SETS: ReadonlyArray<{
-  key: string;
-  label: string;
-  category: string;
-}> = [
-  { key: 'greatRunes', label: 'Great Runes', category: 'Great Rune' },
-  { key: 'remembrances', label: 'Remembrances', category: 'Remembrance' },
-];
+export const GREAT_RUNES = [
+  { name: "Godrick's Great Rune", itemIds: [191, 8148], bossFlagId: 10000800 },
+  { name: "Radahn's Great Rune", itemIds: [192, 8149], bossFlagId: 1252380800 },
+  { name: "Morgott's Great Rune", itemIds: [193, 8150], bossFlagId: 11000800 },
+  { name: "Rykard's Great Rune", itemIds: [194, 8151], bossFlagId: 16000800 },
+  { name: "Mohg's Great Rune", itemIds: [195, 8152], bossFlagId: 12050800 },
+  { name: "Malenia's Great Rune", itemIds: [196, 8153], bossFlagId: 15000800 },
+  { name: "Great Rune of the Unborn", itemIds: [10080], bossFlagId: 14000800 },
+] as const;
+
+export const REMEMBRANCES = [
+  { name: 'Remembrance of the Grafted', goodId: 2950, bossFlagId: 10000800 },
+  { name: 'Remembrance of the Starscourge', goodId: 2951, bossFlagId: 1252380800 },
+  { name: 'Remembrance of the Omen King', goodId: 2952, bossFlagId: 11000800 },
+  { name: 'Remembrance of the Blasphemous', goodId: 2953, bossFlagId: 16000800 },
+  { name: 'Remembrance of the Rot Goddess', goodId: 2954, bossFlagId: 15000800 },
+  { name: 'Remembrance of the Blood Lord', goodId: 2955, bossFlagId: 12050800 },
+  { name: 'Remembrance of the Black Blade', goodId: 2956, bossFlagId: 13000800 },
+  { name: 'Remembrance of Hoarah Loux', goodId: 2957, bossFlagId: 11050800 },
+  { name: 'Remembrance of the Dragonlord', goodId: 2958, bossFlagId: 13000830 },
+  { name: 'Remembrance of the Full Moon Queen', goodId: 2959, bossFlagId: 14000800 },
+  { name: 'Remembrance of the Lichdragon', goodId: 2960, bossFlagId: 12030850 },
+  { name: 'Remembrance of the Fire Giant', goodId: 2961, bossFlagId: 1052520800 },
+  { name: 'Remembrance of the Regal Ancestor', goodId: 2962, bossFlagId: 12090800 },
+  { name: 'Elden Remembrance', goodId: 2963, bossFlagId: 19000800 },
+  { name: 'Remembrance of the Naturalborn', goodId: 2964, bossFlagId: 12040800 },
+] as const;
 
 export function useCompletion(): CompletionModel {
   const slot = useSelectedSlot();
@@ -163,17 +182,61 @@ export function useCompletion(): CompletionModel {
       : 0;
 
     const ownedIds = new Set<number>();
+    const inventoryQuantityById = new Map<number, number>();
     if (slot)
-      for (const it of inventoryDbView(slot).items) if (it.quantity > 0) ownedIds.add(it.item_id);
-    const milestones: Milestone[] = MILESTONE_SETS.map(({ key, label, category }) => {
-      const set = GOODS.filter((g) => g.category === category && !g.name.startsWith('[ERROR]'));
-      return {
-        key,
-        label,
-        total: set.length,
-        owned: set.filter((g) => ownedIds.has(g.id)).length,
-      };
-    });
+      for (const it of inventoryDbView(slot).items) {
+        inventoryQuantityById.set(it.item_id, it.quantity);
+        if (it.quantity > 0) ownedIds.add(it.item_id);
+      }
+
+    const defeatedBossFlags = new Set(bosses.filter((e) => e.on).map((e) => e.id));
+
+    const ownedGreatRunes = GREAT_RUNES.filter(
+      (r) =>
+        r.itemIds.some((id) => ownedIds.has(id)) ||
+        defeatedBossFlags.has(r.bossFlagId) ||
+        (r.name.includes('Radahn') && defeatedBossFlags.has(310)),
+    ).length;
+
+    const ownedRemembrances = REMEMBRANCES.filter(
+      (r) =>
+        ownedIds.has(r.goodId) ||
+        defeatedBossFlags.has(r.bossFlagId) ||
+        (r.name.includes('Starscourge') && defeatedBossFlags.has(310)) ||
+        (r.name.includes('Elden') && defeatedBossFlags.has(19000810)),
+    ).length;
+
+    const crimsonFlaskPotency = (() => {
+      for (let i = 12; i >= 1; i--) {
+        const item = goodsByName.get(`Flask of Crimson Tears +${i}`);
+        if (item && ownedIds.has(item.id)) return i;
+      }
+      return 0;
+    })();
+    const sacredTearGood = goodsByName.get('Sacred Tear');
+    const unusedSacredTears = sacredTearGood ? (inventoryQuantityById.get(sacredTearGood.id) ?? 0) : 0;
+    const sacredTearsFound = Math.min(12, crimsonFlaskPotency + unusedSacredTears);
+
+    const milestones: Milestone[] = [
+      {
+        key: 'greatRunes',
+        label: 'Great Runes',
+        total: GREAT_RUNES.length,
+        owned: ownedGreatRunes,
+      },
+      {
+        key: 'remembrances',
+        label: 'Remembrances',
+        total: REMEMBRANCES.length,
+        owned: ownedRemembrances,
+      },
+      {
+        key: 'sacredTears',
+        label: 'Sacred Tears',
+        total: 12,
+        owned: sacredTearsFound,
+      },
+    ];
 
     return { hasSave: !!slot, overallPct, categories, milestones };
   }, [slot, tables]);
