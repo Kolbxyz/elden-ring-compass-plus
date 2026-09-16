@@ -1,0 +1,1 @@
+import{m as e}from"./decode-uD40892K.js";function t(t){let n=new Set;if(t)for(let e=0;e<t.regions.unlocked_regions_count;e++){let r=t.regions.unlocked_regions[e];if(r===void 0)break;n.add(r)}return e.map(e=>({id:e.id,name:e.name,map:e.area,isOpenWorld:e.isOpenWorld,isDungeon:e.isDungeon,found:n.has(e.id)}))}export{t};
