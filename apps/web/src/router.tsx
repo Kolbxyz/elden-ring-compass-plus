@@ -6,6 +6,7 @@ import { routeTree } from './routeTree.gen';
 export const getRouter = () => {
   const router = createRouter({
     routeTree,
+    basepath: import.meta.env.BASE_URL,
     context: {},
     defaultNotFoundComponent: NotFound,
     // Shown in the content area while a route resolves (mainly lazy chunk loads,

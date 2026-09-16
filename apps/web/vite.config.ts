@@ -21,11 +21,18 @@ import { erDataTiles } from './vite-plugins/er-data-tiles';
 // the Build Output API to `.vercel/output` (NOT `.output`). In a monorepo Vercel only auto-detects
 // that dir at the REPO ROOT, but Nitro writes it relative to its cwd (apps/web) — so redirect the
 // output up two levels. Locally (no VERCEL) the default node-server preset + `.output` is untouched.
+const isGhPages = Boolean(process.env.GITHUB_PAGES);
+const basePath = process.env.BASE_PATH ?? (isGhPages ? '/elden-ring-compass-plus/' : '/');
+
 const appOnlyPlugins = process.env.VITEST
   ? []
   : [
       devtools(),
-      tanstackStart({ prerender: { enabled: false } }),
+      tanstackStart({
+        prerender: {
+          enabled: process.env.PRERENDER === 'true' || isGhPages,
+        },
+      }),
       nitro(
         process.env.VERCEL
           ? { output: { dir: path.resolve(__dirname, '../../.vercel/output') } }
@@ -42,6 +49,7 @@ const reactCompilerPlugins = process.env.VITEST
   : [babel({ presets: [reactCompilerPreset()] })];
 
 export default defineConfig({
+  base: basePath,
   server: {
     port: 3005,
     strictPort: true,
@@ -64,5 +72,11 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
     },
+  },
+  ssr: {
+    external: ['lucide-react'],
+  },
+  optimizeDeps: {
+    include: ['lucide-react'],
   },
 });

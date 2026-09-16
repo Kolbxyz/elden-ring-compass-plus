@@ -1,129 +1,137 @@
-# Elden Ring Compass — Save file / Progression Website
+<p align="center">
+  <img src="apps/web/public/favicon.svg" width="96" height="96" alt="Elden Ring Compass logo" />
+</p>
 
-### Check it out here: [www.eldenringcompass.com](https://www.eldenringcompass.com)
+<h1 align="center">Elden Ring Compass</h1>
 
-Upload (or continuously poll) your Elden Ring save and the site reads your
-progression — inventory, bosses defeated, graces, map markers, and more —
-entirely in your browser. Nothing is ever written back to the save.
+<p align="center">
+  A high-performance, in-browser save reader and interactive progression tracker for Elden Ring.
+</p>
 
-## Key Technologies
+<p align="center">
+  <a href="https://github.com/Kolbxyz/elden-ring-compass-plus/actions/workflows/pages.yml"><img src="https://img.shields.io/github/actions/workflow/status/Kolbxyz/elden-ring-compass-plus/pages.yml?branch=main&label=Pages%20Deploy&style=flat-square" alt="GitHub Pages Deployment"/></a>
+  <a href="https://github.com/Kolbxyz/elden-ring-compass-plus/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square" alt="License"/></a>
+  <a href="https://bun.sh"><img src="https://img.shields.io/badge/runtime-Bun-fbf0df?style=flat-square&logo=bun" alt="Bun"/></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/react-19-61dafb?style=flat-square&logo=react" alt="React 19"/></a>
+  <a href="https://tanstack.com"><img src="https://img.shields.io/badge/tanstack-router%20%26%20start-ff4154?style=flat-square" alt="TanStack"/></a>
+  <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/tailwind-v4-38bdf8?style=flat-square&logo=tailwindcss" alt="Tailwind CSS v4"/></a>
+</p>
 
-- **TanStack Start** (full-stack React framework) + **TanStack Router** (file-based routing)
-- **React 19** (with the React Compiler)
-- **Effect** + **`@effect/atom-react`** — app state and the in-memory data layer (no TanStack Query, no IndexedDB)
-- **shadcn** (Base UI variant, `@base-ui/react`) + **Tailwind CSS v4**
-- **Leaflet / react-leaflet** — tiled interactive map
-- **TanStack Table** + **TanStack Virtual** — virtualized data tables
-- **Bun** + **Turborepo** — package manager and monorepo task runner
-- **Vite** / **Nitro** — bundling and the production server
-- **oxlint / oxfmt** — linting and formatting
-- **tsgo** (TypeScript native preview) — type checking
-- **Vitest** + **Playwright** — unit, browser, and E2E tests
+---
 
-## Monorepo Layout
+Upload (or continuously poll) your Elden Ring save file (`.sl2`) and the site decodes your full progression — inventory, defeated bosses, unlocked sites of grace, active map markers, equipment, and quest flags — entirely inside your browser.
 
-| Package                                   | What it is                                                                                                                                                                |
-| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `apps/web`                                | The website itself.                                                                                                                                                       |
-| `packages/data`                           | The **single runtime data source** — game data + item icons baked by the extractor. This is all the web app consumes.                                                     |
-| `packages/save-parser` (`save-parser-ts`) | Pure-TypeScript Elden Ring save parser. Runs in the browser/worker.                                                                                                       |
-| `packages/extractor` (`er-extractor`)     | Build-time CLI that reads an installed copy of the game and bakes everything `data` needs (names, stats, markers, icons, graces, event scripts).                          |
-| `packages/vendored-data`                  | Build-time-only reverse-engineered constants the extractor can't derive from the install (event-flag tables, AES/RSA keys, param schemas). See its README for provenance. |
-| `packages/config/*`                       | Shared TypeScript / oxlint config.                                                                                                                                        |
+Zero server uploads, zero telemetry, and zero modifications to your save file.
 
-## Data & Save Parsing
+> **Original project**: Forked from [Elden Ring Compass](https://www.eldenringcompass.com). Enhanced with GitHub Pages static deployment workflows, modernized monorepo tooling, and comprehensive questline dependency analysis.
 
-The save parser is **pure TypeScript** — the old Rust/WASM save-editor stack has
-been removed (the TS port is dramatically faster and ships with no native deps).
-
-Game data is produced by our own `er-extractor`, which reads the installed game
-directly (Oodle decompression via `bun:ffi`, dvdbnd unpacking, FMG/PARAM/MSB/EMEVD
-parsing) and bakes the result into `@elden-ring-compass/data`. This replaces the
-external `erdb` dataset the project originally relied on. The reverse-engineered
-constants that can't be read from the install are vendored in `packages/vendored-data`,
-adapted from these excellent upstream projects:
-
-- [ER-Save-Lib](https://github.com/ClayAmore/ER-Save-Lib) — save-format constants (event-flag table, regulation key)
-- [UXM-Selective-Unpack](https://github.com/Nordgaren/UXM-Selective-Unpack) — archive RSA keys + file-path dictionary
-- [soulsmods / Paramdex](https://github.com/soulsmods/Paramdex) — PARAMDEF field schemas for `regulation.bin`
-- [soulstruct](https://github.com/Grimrukh/soulstruct) — EMEVD instruction dictionary (EMEDF)
+---
 
 ## Features
 
-- **In-browser save parsing**: your save is parsed locally — it never leaves your machine, and the site never writes to it.
-- **Continuous save polling**: point the tab at your save and it keeps the view updated as you play, without re-uploading.
-- **Local storage sync**: map position, row selection, and column filters all persist locally.
-- **Tiled interactive map** with item/boss/grace markers.
+| Feature | In-Browser | Live Polling | Map Sync | Local Cache | Save-Safe |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **Bosses & Defeat Flags** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Sites of Grace** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Inventory & Equipment** | ✅ | ✅ | — | ✅ | ✅ |
+| **Map Markers & Placements** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Questlines & Milestones** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Weapon Scaling & AR** | ✅ | — | — | ✅ | ✅ |
 
-## Additional Details
+- **In-Browser Save Parsing** — 100% pure TypeScript save parser running inside a Web Worker. Reads the complete event-flag bitfield via binary search trees (`eventflag-bst.txt`) with zero native dependencies or WASM overhead.
+- **Continuous Live Polling** — Point a browser tab to your local save directory using any simple HTTP server; the app auto-refreshes your character state in real-time as you play.
+- **Interactive Tiled Map** — Leaflet-powered multi-layer game map with marker filtering, location coordinates, and blank tile skip optimizations.
+- **Local Storage Sync** — Map viewports, filter selections, active character slots, and table preferences are persisted locally on your device.
+- **Stat & Attack Rating Engine** — Real-time AR calculation graphs covering scaling curves, reinforcement tiers, and affinities.
 
-The default code snippet requires Node.js for the HTTP server, but any simple HTTP file server will work.
+---
 
-If you prefer, you can manually upload the save without using continuous polling.
+## Safety & Anti-Cheat
 
-## Can this get me banned?
+**Can this get me banned? No.**
 
-No, this site has no ability to make changes to the save. For edits to be possible, you would either need to redownload your save after uploading or the HTTP server would need to support PUT/POST requests, which if you use the snippet provided it doesn't. (Not that my site even makes these requests)
-Elden Ring is fine with other programs reading or copying the save. Steam does this repeatedly to make cloud backups.
+1. **Read-Only by Architecture** — The application operates exclusively as a reader. It cannot write, mutate, or re-sign your save file.
+2. **No Memory Injection** — Unlike Cheat Engine or memory hooks, this tool reads static files from disk. Easy Anti-Cheat (EAC) remains untouched.
+3. **No Network Transmission** — Your save file never leaves your browser sandbox. All parsing and event evaluation happen locally.
+4. **Cloud-Backup Equivalent** — Elden Ring allows external programs to inspect save files (Steam Cloud regularly reads and syncs `.sl2` files while playing).
 
-Let me know what you think!
+---
 
-## Contributing
+## Architecture
+
+Monorepo powered by **Turborepo** and **Bun**:
+
+```
+apps/
+  web/               Full-stack React 19 web app (TanStack Start, Vite, Nitro, Leaflet)
+packages/
+  data/              Single runtime data source: game params, items, icons, placements
+  save-parser/       Pure TypeScript save parser (save-parser-ts, worker protocol)
+  extractor/         Build-time CLI: parses dvdbnd, FMG, PARAM, MSB, and EMEVD from install
+  vendored-data/     Reverse-engineered constants: event-flag BST, AES/RSA keys, schemas
+  config/            Shared TypeScript, Vite, and Oxlint configurations
+```
+
+### Technology Stack
+
+- **Framework**: [TanStack Start](https://tanstack.com/start) + [TanStack Router](https://tanstack.com/router)
+- **UI & Styling**: [React 19](https://react.dev) (React Compiler), [Base UI](https://base-ui.com/) (`@base-ui/react`), [Tailwind CSS v4](https://tailwindcss.com)
+- **State & Data**: [Effect](https://effect.website) + `@effect/atom-react`
+- **Mapping & Tables**: [Leaflet](https://leafletjs.com/) (`react-leaflet`), [TanStack Table](https://tanstack.com/table), [TanStack Virtual](https://tanstack.com/virtual)
+- **Toolchain**: [Bun](https://bun.sh), [Turborepo](https://turbo.build), [Vite](https://vite.dev), [oxlint](https://oxc.rs)/[oxfmt](https://oxc.rs), [Vitest](https://vitest.dev), [Playwright](https://playwright.dev)
+
+---
+
+## Building & Development
 
 ### Prerequisites
 
-The web app only needs **[Bun](https://bun.sh/)**. A reproducible toolchain is also
-provided via **Nix** (`flake.nix`).
-
-> Note: building game `data` from scratch with `er-extractor` additionally requires an
-> installed copy of Elden Ring and the Rust toolchain (for the extractor's native image
-> codec). You do **not** need either to run or develop the web app — the prebuilt `data`
-> package is committed.
-
-#### Setting up Nix (recommended)
-
-If you have Nix installed with flake support enabled:
+- **[Bun](https://bun.sh/)** (v1.3+ recommended)
+- Optional: **Nix** with flakes enabled (`flake.nix`)
 
 ```bash
-# Enter the development shell (auto-activates with direnv if installed)
+# Optional Nix development shell
 nix develop
-
-# Or if using direnv:
+# or with direnv:
 direnv allow
 ```
 
-#### Without Nix
-
-Just install [Bun](https://bun.sh/).
-
-### Setup
-
-Install dependencies:
+### Getting Started
 
 ```bash
+# 1. Install dependencies across workspaces
 bun install
-```
 
-### Development
-
-Start the development server:
-
-```bash
+# 2. Start the local development server
 bun run dev
-```
 
-### Checks
-
-```bash
-# Lint + format
-bun run lint
-
-# Type checking (tsgo)
+# 3. Type-check with native TypeScript preview (tsgo)
 bun run typecheck
 
-# Tests
+# 4. Lint and format code
+bun run lint
+
+# 5. Run unit and integration tests
 bun run test
 
-# Full production build
+# 6. Build production bundles
 bun run build
 ```
+
+---
+
+## Provenance & Credits
+
+Game data extraction and event flag resolution rely on research from the FromSoftware modding community:
+
+- **[ER-Save-Lib](https://github.com/ClayAmore/ER-Save-Lib)** — Save-format constants, event-flag tables, regulation keys.
+- **[UXM-Selective-Unpack](https://github.com/Nordgaren/UXM-Selective-Unpack)** — Game archive RSA keys and file dictionary.
+- **[soulsmods / Paramdex](https://github.com/soulsmods/Paramdex)** — PARAMDEF field definitions for `regulation.bin`.
+- **[soulstruct](https://github.com/Grimrukh/soulstruct)** — EMEVD instruction dictionary (EMEDF).
+- **[er-save-manager](https://github.com/Hapfel/er-save-manager)** — Questline flag maps and state machine references.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
