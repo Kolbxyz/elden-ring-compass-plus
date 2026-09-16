@@ -115,8 +115,8 @@ function CopySaveAsJsonButton() {
       onClick={() => void handleCopy()}
     >
       {isPending && <Spinner />}
-      {recentSuccess && <span className='text-green-500'>✔</span>}
-      {error ? error.message : 'Copy Save as JSON'}
+      {recentSuccess && <span className='text-emerald-500 text-xs font-semibold'>Copied</span>}
+      {error ? error.message : recentSuccess ? '' : 'Copy Save as JSON'}
     </Button>
   );
 }

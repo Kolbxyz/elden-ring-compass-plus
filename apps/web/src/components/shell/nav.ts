@@ -98,4 +98,4 @@ export const SECTION_META: Record<string, { title: string; sub: string }> = {
   },
 };
 
-export const REPO_URL = 'https://github.com/EthanShoeDev/elden-ring-compass';
+export const REPO_URL = 'https://github.com/Kolbxyz/elden-ring-compass-plus';

@@ -15,6 +15,7 @@
  */
 import {
   ChevronDownIcon,
+  EyeOffIcon,
   LayersIcon,
   LocateFixedIcon,
   MapPinIcon,
@@ -97,6 +98,8 @@ function MapRightRail({
   defaultControlsOpen,
   layers,
   onLayerChange,
+  hideCompleted,
+  onHideCompletedChange,
   onQuickSelect,
   onClearPins,
   pinCount,
@@ -106,6 +109,8 @@ function MapRightRail({
   defaultControlsOpen: boolean;
   layers: Record<LayerKey, boolean>;
   onLayerChange: (key: LayerKey, visible: boolean) => void;
+  hideCompleted: boolean;
+  onHideCompletedChange: (hide: boolean) => void;
   onQuickSelect: (type: 'grace' | 'boss', on: boolean) => void;
   onClearPins: () => void;
   pinCount: number;
@@ -168,11 +173,37 @@ function MapRightRail({
                   />
                 </label>
               ))}
+              <div className='my-1 border-t border-border/50' />
+              <label className='flex cursor-pointer items-center gap-2 text-sm select-none'>
+                <EyeOffIcon
+                  className={cn(
+                    'size-4 text-muted-foreground',
+                    hideCompleted && 'text-amber-500',
+                  )}
+                />
+                Hide completed / found
+                <Switch
+                  className='ml-auto'
+                  checked={hideCompleted}
+                  onCheckedChange={onHideCompletedChange}
+                />
+              </label>
             </div>
           </div>
           <div className='border-t border-border pt-2.5'>
             <PanelLabel>Quick select</PanelLabel>
             <div className='flex flex-col gap-0.5'>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='w-full justify-start font-normal text-amber-500 hover:text-amber-400'
+                onClick={() => {
+                  onQuickSelect('grace', false);
+                  onQuickSelect('boss', false);
+                }}
+              >
+                <MapPinIcon /> All Undiscovered
+              </Button>
               <Button
                 variant='ghost'
                 size='sm'
@@ -478,6 +509,8 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
     bosses: true,
     items: true,
   });
+  // Auto-filter completed/found pins on the map
+  const [hideCompleted, setHideCompleted] = useState(false);
   // Bumped to ask the map to recenter on the player ("center on me").
   const [recenterToken, setRecenterToken] = useState(0);
 
@@ -490,8 +523,11 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
   const bloodstainPin = useBloodstainPin();
   const slotConnected = !!useSelectedSlot();
   const visiblePins = useMemo(
-    () => pins.filter((p) => layers[pinLayer(p.category)]),
-    [pins, layers],
+    () =>
+      pins.filter(
+        (p) => layers[pinLayer(p.category)] && (!hideCompleted || !p.discovered),
+      ),
+    [pins, layers, hideCompleted],
   );
   // Selected-pin counts per realm, surfaced as badges on the map switcher so a
   // pin dropped on a non-active map is never a silent no-op. Counts what would
@@ -657,6 +693,8 @@ export function MapSection({ embedded = false }: { embedded?: boolean } = {}) {
               defaultControlsOpen={!isMobile}
               layers={layers}
               onLayerChange={(key, visible) => setLayers((l) => ({ ...l, [key]: visible }))}
+              hideCompleted={hideCompleted}
+              onHideCompletedChange={setHideCompleted}
               onQuickSelect={selectEvents}
               onClearPins={clearPins}
               pinCount={pins.length}

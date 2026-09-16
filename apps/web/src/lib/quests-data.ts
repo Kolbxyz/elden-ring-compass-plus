@@ -247,7 +247,8 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'After reaching Altus Plateau, talk to Corhyn in Roundtable Hold. He will depart to find Goldmask. Meet him on the road north of Altus Highway Junction.',
         flagId: 1038500200,
-        altFlagIds: [1038500201],
+        altFlagIds: [1038500201, 1038500500, 1038507000, 1038507010],
+        graceFlagIds: [76201, 76202, 76230],
       },
       {
         id: 'goldmask-2',
@@ -257,7 +258,16 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           "Find Goldmask standing silently at the broken north tip of the Forest-Spanning Greatbridge. Return to Corhyn and tell him Goldmask's location, then visit them together.",
         flagId: 1038500210,
-        altFlagIds: [1038500215],
+        altFlagIds: [
+          1038500215,
+          1038517070,
+          1038517080,
+          1038518500,
+          1038518540,
+        ],
+        itemNames: ['Discus of Light'],
+        graceFlagIds: [76230],
+        rewards: ['Discus of Light available for purchase'],
       },
       {
         id: 'goldmask-3',
@@ -267,7 +277,20 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Obtain the Golden Order Principia from the sanctuary rafters. Learn Law of Regression (37 INT). Cast it while standing on the message reading "Regression alone reveals secrets" below the sanctuary, then report the truth to Goldmask.',
         flagId: 1038500230,
-        itemNames: ['Golden Order Principia', 'Law of Regression'],
+        altFlagIds: [
+          1038547000,
+          1038547010,
+          1038547020,
+          1038547050,
+          1038547060,
+          1038547700,
+        ],
+        itemNames: [
+          "Radagon's Rings of Light",
+          'Golden Order Principia',
+          'Law of Regression',
+        ],
+        graceFlagIds: [71110, 71101],
         requiresBefore: 'Must solve BEFORE defeating Maliketh in Farum Azula',
         missable: true,
       },
@@ -279,7 +302,8 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Find Goldmask and Corhyn on the bridge southwest of Stargazer’s Ruins. Talk to Corhyn about his growing doubts regarding Goldmask’s calculations.',
         flagId: 1038500250,
-        graceFlagIds: [76332],
+        itemNames: ['Immutable Shield'],
+        graceFlagIds: [76332, 76321],
       },
       {
         id: 'goldmask-5',
@@ -470,8 +494,8 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Meet Nepheli in a room before Godrick’s arena. Summon her to assist in slaying Godrick the Grafted. Afterwards, meet her at Roundtable Hold for the Arsenal Charm.',
         flagId: 1035500100,
+        altFlagIds: [1035500510, 1035500511, 1035500514],
         itemNames: ['Arsenal Charm'],
-        bossFlagIds: [10000800], // Godrick defeated
         rewards: ['Arsenal Charm'],
       },
       {
@@ -494,6 +518,7 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'Find Nepheli beneath the village bridge grieving the massacre. Summon her to slay the Omenkiller boss. Afterwards, find her disowned by Gideon downstairs in Roundtable Hold.',
         flagId: 1035500120,
+        altFlagIds: [1035500560],
         graceFlagIds: [76212],
       },
       {
@@ -502,9 +527,9 @@ export const QUESTLINES: readonly Questline[] = [
         title: 'Gift The Stormhawk King',
         location: 'Chapel of Anticipation / Roundtable Hold',
         description:
-          'Use a Imbued Sword Key at the Four Belfries to reach the Chapel of Anticipation. Loot The Stormhawk King spirit ashes and deliver them to Nepheli. (WARNING: Do NOT give her Seluvis’s Potion!).',
+          'Use an Imbued Sword Key at the Four Belfries to reach the Chapel of Anticipation. Loot The Stormhawk King spirit ashes and deliver them to Nepheli. (WARNING: Do NOT give her Seluvis’s Potion!).',
         flagId: 1035500140,
-        itemNames: ['The Stormhawk King'],
+        altFlagIds: [1035500570, 1035500571],
         missable: true,
         requiresBefore: 'Do NOT give Seluvis potion to Nepheli!',
       },
@@ -516,7 +541,7 @@ export const QUESTLINES: readonly Questline[] = [
         description:
           'After slaying Morgott in Leyndell and satisfying Kenneth/Nepheli steps, rest at Godrick’s grace. Nepheli ascends the throne as Lord of Limgrave, with Kenneth and Gostoc present.',
         flagId: 1035500160,
-        bossFlagIds: [11000800], // Morgott defeated is prerequisite for coronation
+        altFlagIds: [1035500900, 1035500920],
         rewards: ['Ancient Dragon Smithing Stone x2'],
       },
     ],

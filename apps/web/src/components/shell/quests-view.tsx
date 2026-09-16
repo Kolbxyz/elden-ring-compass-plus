@@ -4,11 +4,8 @@ import {
   CheckCircle2Icon,
   ChevronDownIcon,
   ChevronUpIcon,
-  CompassIcon,
   MapPinIcon,
   RotateCcwIcon,
-  SparklesIcon,
-  TrophyIcon,
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 
@@ -245,7 +242,7 @@ export function QuestsView() {
           <div className='text-2xl font-bold mt-1 flex items-center gap-2'>
             {connected ? (
               <span className='text-emerald-500 text-lg flex items-center gap-1.5'>
-                <span className='size-2.5 rounded-full bg-emerald-500 animate-pulse' />
+                <span className='size-2 rounded-full bg-emerald-500' />
                 Connected
               </span>
             ) : (
@@ -319,9 +316,8 @@ export function QuestsView() {
                       {quest.endingLink && (
                         <Badge
                           variant='outline'
-                          className='text-[11px] border-amber-500/40 text-amber-500 bg-amber-500/5 flex items-center gap-1'
+                          className='text-[11px] border-amber-500/40 text-amber-500 bg-amber-500/5'
                         >
-                          <TrophyIcon className='size-3' />
                           {quest.endingLink}
                         </Badge>
                       )}
@@ -362,8 +358,8 @@ export function QuestsView() {
                 {!isFullyDone && nextStep && (
                   <div className='mt-4 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2'>
                     <div className='flex items-start sm:items-center gap-2.5'>
-                      <div className='size-6 rounded-full bg-amber-500/20 text-amber-500 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0'>
-                        <CompassIcon className='size-3.5 animate-spin-slow' />
+                      <div className='size-6 rounded-full bg-amber-500/20 text-amber-500 text-xs font-bold flex items-center justify-center shrink-0 mt-0.5 sm:mt-0'>
+                        {nextStep.order}
                       </div>
                       <div>
                         <div className='text-xs font-semibold text-amber-500 flex items-center gap-1.5'>
@@ -380,7 +376,7 @@ export function QuestsView() {
                         variant='outline'
                         className='border-rose-500/40 text-rose-400 bg-rose-500/10 text-[10px]'
                       >
-                        ⚠️ {nextStep.requiresBefore}
+                        {nextStep.requiresBefore}
                       </Badge>
                     )}
                   </div>
@@ -488,9 +484,8 @@ export function QuestsView() {
                                 <Badge
                                   key={rew}
                                   variant='secondary'
-                                  className='text-[10px] bg-secondary/60 text-secondary-foreground flex items-center gap-1'
+                                  className='text-[10px] bg-secondary/60 text-secondary-foreground'
                                 >
-                                  <SparklesIcon className='size-2.5 text-amber-400' />
                                   {rew}
                                 </Badge>
                               ))}
