@@ -1,0 +1,1 @@
+import{a as e,n as t,r as n}from"./compiler-runtime-Dc66hXTW.js";var r=e(n(),1),i=t(),a=()=>!0,o=()=>!1;function s({children:e,fallback:t=null}){return(0,i.jsx)(r.Fragment,{children:c()?e:t})}function c(){return r.useSyncExternalStore(l,a,o)}function l(){return()=>{}}export{c as n,s as t};
