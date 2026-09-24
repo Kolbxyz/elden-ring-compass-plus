@@ -4,7 +4,7 @@
  * TanStack Start renders server-side, but Leaflet touches `window` at import. So
  * the real map (`leaflet-map.tsx`) is loaded only on the client: a mounted guard
  * gates a `React.lazy` dynamic import, so the leaflet module never executes during
- * SSR. The manifest (tile geometry + map list) is fetched from `/map-tiles/`.
+ * SSR. The manifest (tile geometry + map list) is fetched from `MAP_TILES_BASE`.
  *
  * This component owns the non-map UI — the floating control overlays (map
  * switcher, layer toggles, quick-select presets, locate button, legend) — and
@@ -41,6 +41,7 @@ import {
 } from '@/lib/inventory-catalog';
 import { BADGE_LABEL, bossBadges, bossMapName, bossReward } from '@/lib/boss-meta';
 import { playerToMasterPixel } from '@/lib/map-affine';
+import { MAP_TILES_BASE } from '@/lib/map-tiles';
 import { bossMapIdByFlag, bossPinByFlag, itemPins } from '@/lib/vm/map-pins';
 import { useSelectedSlot } from '@/stores/slot-selection-store';
 

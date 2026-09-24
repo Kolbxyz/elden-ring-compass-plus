@@ -10,7 +10,7 @@ import path from 'path';
 // which `mergeConfig` THIS config to inherit the plugins below. `defineConfig` from
 // `vitest/config` (a superset of Vite's) keeps it importable from those configs.
 import { defineConfig } from 'vitest/config';
-import { erDataTiles } from './vite-plugins/er-data-tiles';
+import { erDataTiles } from './vite-plugins/er-data-tiles.ts';
 
 // Vitest sets this. The app-server plugins below (devtools/tanstackStart/nitro) are only needed for
 // `vite dev`/`vite build`; under Vitest they break browser mode (`react: module is not defined`
@@ -29,11 +29,22 @@ const appOnlyPlugins = process.env.VITEST
   : [
       devtools(),
       tanstackStart({ prerender: { enabled: false } }),
-      nitro(
-        process.env.VERCEL
-          ? { output: { dir: path.resolve(__dirname, '../../.vercel/output') } }
-          : undefined,
-      ),
+      nitro({
+        // Files under `public/` aren't fingerprinted, so Nitro/Vercel serve them
+        // `max-age=0, must-revalidate` — every map pan re-validated every tile (one billed edge
+        // request per 304). The tile prefix is content-versioned (`/map-tiles/{hash}/`, see
+        // `vite-plugins/er-data-tiles.ts`), so the whole tree is safe to cache for a year. Nitro's
+        // vercel preset emits this as a route in `.vercel/output/config.json`; the node preset
+        // applies it at runtime, so local `.output` previews match.
+        routeRules: {
+          '/map-tiles/**': {
+            headers: { 'cache-control': 'public, max-age=31536000, immutable' },
+          },
+        },
+        ...(process.env.VERCEL
+          ? { output: { dir: path.resolve(import.meta.dirname, '../../.vercel/output') } }
+          : {}),
+      }),
     ];
 
 // React Compiler (plugin-react v6 removed the inline babel option, so this runs via
@@ -71,7 +82,7 @@ export default defineConfig({
   resolve: {
     tsconfigPaths: true,
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(import.meta.dirname, './src'),
     },
   },
 });
